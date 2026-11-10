@@ -74,9 +74,11 @@ export function StatCard({
     blue: "bg-info/10 text-info",
   }[tone];
   return (
-    <Card className="flex items-center gap-4 p-5">
-      <span className={cn("grid h-12 w-12 shrink-0 place-items-center rounded-xl", t)}>
-        <Icon className="h-6 w-6" />
+    <Card className="flex flex-col items-start gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+      <span
+        className={cn("grid h-10 w-10 shrink-0 sm:h-12 sm:w-12 place-items-center rounded-xl", t)}
+      >
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </span>
       <div className="min-w-0">
         <p className="text-sm font-medium text-muted-foreground">{label}</p>

@@ -44,7 +44,7 @@ export interface GrowthPoint {
 export function patientPoints(
   p: Patient,
   measure: GrowthMeasure,
-  corrected = false,
+  corrected: boolean = isPremature(p),
 ): GrowthPoint[] {
   return [...p.measurements]
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -65,7 +65,7 @@ export interface GrowthAlert {
 export function growthAlert(
   p: Patient,
   measure: GrowthMeasure,
-  corrected = false,
+  corrected: boolean = isPremature(p),
 ): GrowthAlert | null {
   const pts = patientPoints(p, measure, corrected);
   if (!pts.length) return null;

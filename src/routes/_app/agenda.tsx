@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, Field, PageHeader } from "@/components/pediflux/ui";
-import { STATUS_META, TONE_BLOCK, StatusBadge } from "@/components/pediflux/StatusBadge";
+import { STATUS_META, TONE_BLOCK } from "@/components/pediflux/StatusBadge";
 import { AppointmentDetailDialog } from "@/components/pediflux/appointments";
 import { WhatsAppReminderDialog } from "@/components/pediflux/dialogs";
 import { actions, useStore } from "@/data/store";
@@ -107,7 +107,7 @@ function AgendaPage() {
     <div>
       <PageHeader
         title="Agenda"
-        subtitle={`${countDay} consultas ${view === "dia" ? "neste dia" : "nesta semana"}`}
+        subtitle={`${countDay} consultas ${view === "dia" ? "neste dia" : "nesta semana"} · clique num horário livre para agendar`}
         actions={
           <>
             <Button variant="outline" onClick={() => setBlockOpen(true)}>
@@ -120,7 +120,7 @@ function AgendaPage() {
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_300px]">
         <Card className="overflow-hidden">
           {/* Barra de navegação */}
           <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
@@ -152,7 +152,7 @@ function AgendaPage() {
               type="date"
               value={date}
               onChange={(e) => e.target.value && setDate(e.target.value)}
-              className="h-9 w-auto"
+              className="hidden h-9 w-auto sm:block"
               aria-label="Ir para data"
             />
             <div className="ml-auto inline-flex rounded-xl bg-muted p-1">
@@ -177,43 +177,45 @@ function AgendaPage() {
           {/* Grade */}
           <div className="overflow-x-auto">
             <div className={cn("relative", view === "semana" && "min-w-[860px]")}>
-              {/* Cabeçalho dos dias */}
-              <div
-                className="sticky top-0 z-10 grid border-b border-border bg-card"
-                style={{ gridTemplateColumns: `64px repeat(${days.length}, minmax(0, 1fr))` }}
-              >
-                <div />
-                {days.map((d) => {
-                  const isToday = d === todayISO();
-                  const n = appointments.filter((a) => a.date === d).length;
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => {
-                        setDate(d);
-                        setView("dia");
-                      }}
-                      className="flex flex-col items-center gap-0.5 border-l border-border py-2 hover:bg-muted/50"
-                    >
-                      <span className="text-xs font-semibold uppercase text-muted-foreground">
-                        {weekdayShort(d)}
-                      </span>
-                      <span
-                        className={cn(
-                          "grid h-8 w-8 place-items-center rounded-full text-sm font-extrabold",
-                          isToday ? "bg-teal text-white" : "text-navy",
-                        )}
+              {/* Cabeçalho dos dias (só na semana; na visão dia a data já está na barra) */}
+              {view === "semana" && (
+                <div
+                  className="sticky top-0 z-10 grid border-b border-border bg-card"
+                  style={{ gridTemplateColumns: `64px repeat(${days.length}, minmax(0, 1fr))` }}
+                >
+                  <div />
+                  {days.map((d) => {
+                    const isToday = d === todayISO();
+                    const n = appointments.filter((a) => a.date === d).length;
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => {
+                          setDate(d);
+                          setView("dia");
+                        }}
+                        className="flex flex-col items-center gap-0.5 border-l border-border py-2 hover:bg-muted/50"
                       >
-                        {parseISO(d).getDate()}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">{n} consultas</span>
-                    </button>
-                  );
-                })}
-              </div>
+                        <span className="text-xs font-semibold uppercase text-muted-foreground">
+                          {weekdayShort(d)}
+                        </span>
+                        <span
+                          className={cn(
+                            "grid h-8 w-8 place-items-center rounded-full text-sm font-extrabold",
+                            isToday ? "bg-teal text-white" : "text-navy",
+                          )}
+                        >
+                          {parseISO(d).getDate()}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">{n} consultas</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               <div
-                className="grid"
+                className="grid pt-3"
                 style={{ gridTemplateColumns: `64px repeat(${days.length}, minmax(0, 1fr))` }}
               >
                 {/* Horários */}
@@ -250,7 +252,7 @@ function AgendaPage() {
         </Card>
 
         {/* Lateral */}
-        <div className="grid content-start gap-6">
+        <div className="grid grid-cols-1 content-start gap-6">
           <Card className="p-5">
             <div className="flex items-center gap-3">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-brand text-white">
@@ -283,54 +285,41 @@ function AgendaPage() {
             </div>
           </Card>
 
-          <Card className="p-5">
-            <p className="mb-3 font-bold text-navy">Legenda</p>
-            <div className="flex flex-wrap gap-2">
-              {(Object.keys(STATUS_META) as (keyof typeof STATUS_META)[]).map((s) => (
-                <StatusBadge key={s} status={s} />
-              ))}
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              Clique em um horário vazio para agendar. Clique em uma consulta para ver detalhes,
-              mudar o status ou lembrar pelo WhatsApp.
-            </p>
-          </Card>
-
-          <Card className="p-5">
-            <p className="mb-3 font-bold text-navy">
-              Bloqueios {view === "dia" ? "do dia" : "da semana"}
-            </p>
-            {blocks.filter((b) => days.includes(b.date)).length ? (
-              <ul className="grid gap-2">
-                {blocks
-                  .filter((b) => days.includes(b.date))
-                  .map((b) => (
-                    <li
-                      key={b.id}
-                      className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2 text-sm"
-                    >
-                      <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="flex-1">
-                        <b className="text-navy">{b.label}</b> · {weekdayShort(b.date)} {b.start}–
-                        {b.end}
-                      </span>
-                      <button
-                        type="button"
-                        className="text-xs font-semibold text-destructive hover:underline"
-                        onClick={() => {
-                          actions.removeBlock(b.id);
-                          toast("Bloqueio removido");
-                        }}
+          {view === "dia" && (
+            <Card className="p-5">
+              <p className="mb-3 font-bold text-navy">Bloqueios do dia</p>
+              {blocks.filter((b) => days.includes(b.date)).length ? (
+                <ul className="grid gap-2">
+                  {blocks
+                    .filter((b) => days.includes(b.date))
+                    .map((b) => (
+                      <li
+                        key={b.id}
+                        className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2 text-sm"
                       >
-                        Remover
-                      </button>
-                    </li>
-                  ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground">Nenhum bloqueio.</p>
-            )}
-          </Card>
+                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="flex-1">
+                          <b className="text-navy">{b.label}</b> · {weekdayShort(b.date)} {b.start}–
+                          {b.end}
+                        </span>
+                        <button
+                          type="button"
+                          className="text-xs font-semibold text-destructive hover:underline"
+                          onClick={() => {
+                            actions.removeBlock(b.id);
+                            toast("Bloqueio removido");
+                          }}
+                        >
+                          Remover
+                        </button>
+                      </li>
+                    ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">Nenhum bloqueio.</p>
+              )}
+            </Card>
+          )}
         </div>
       </div>
 
@@ -400,7 +389,7 @@ function DayColumn({
         return (
           <div
             key={b.id}
-            className="pointer-events-none absolute inset-x-1 flex items-start gap-1 rounded-lg border border-border bg-[repeating-linear-gradient(135deg,var(--muted)_0_8px,transparent_8px_16px)] px-2 py-1 text-xs font-semibold text-muted-foreground"
+            className="pointer-events-none absolute inset-x-1 flex items-start gap-1 rounded-lg border border-border bg-card bg-[repeating-linear-gradient(135deg,var(--muted)_0_8px,transparent_8px_16px)] px-2 py-1 text-xs font-semibold text-muted-foreground"
             style={{ top, height: h }}
           >
             <Lock className="mt-0.5 h-3 w-3" /> {b.label}

@@ -204,7 +204,7 @@ function HomeTab({ child, goTab }: { child: Patient; goTab: (t: Tab) => void }) 
   const lh = h[h.length - 1];
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       {next ? (
         <div className="overflow-hidden rounded-3xl bg-navy p-5 text-white shadow-lift">
           <p className="text-xs font-semibold uppercase tracking-wide text-white/70">
@@ -361,6 +361,7 @@ function ConsultsTab({ child }: { child: Patient }) {
 
 function GrowthTab({ child }: { child: Patient }) {
   const [measure, setMeasure] = useState<GrowthMeasure>("weight");
+  const [showAll, setShowAll] = useState(false);
   const measures: GrowthMeasure[] = ["weight", "height", "head"];
   const pts = patientPoints(child, measure);
   const last = pts[pts.length - 1];
@@ -368,7 +369,7 @@ function GrowthTab({ child }: { child: Patient }) {
   const digits = (v: number) => (measure === "weight" && v < 20 ? 2 : 1);
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <div className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1">
         {measures.map((m) => (
           <button
@@ -413,32 +414,45 @@ function GrowthTab({ child }: { child: Patient }) {
       </div>
 
       <div className="card-surface divide-y divide-border">
-        {[...pts].reverse().map((p) => {
-          const ok = p.percentile >= 3 && p.percentile <= 97;
-          return (
-            <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
-              <span>
-                <span className="block font-semibold text-navy">{formatDate(p.date)}</span>
-                <span className="text-xs text-muted-foreground">
-                  {formatAge(child.birthDate, p.date)}
+        <p className="px-4 pb-1 pt-3 text-sm font-bold text-navy">Medições</p>
+        {[...pts]
+          .reverse()
+          .slice(0, showAll ? undefined : 5)
+          .map((p) => {
+            const ok = p.percentile >= 3 && p.percentile <= 97;
+            return (
+              <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm">
+                <span>
+                  <span className="block font-semibold text-navy">{formatDate(p.date)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {p.date === child.birthDate ? "Nascimento" : formatAge(child.birthDate, p.date)}
+                  </span>
                 </span>
-              </span>
-              <span className="flex items-center gap-3">
-                <b className="text-navy">
-                  {fmt(p.value, digits(p.value))} {meta.unit}
-                </b>
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 text-xs font-bold",
-                    ok ? "bg-success/12 text-success" : "bg-warning/15 text-[oklch(0.5_0.13_65)]",
-                  )}
-                >
-                  {ok ? "esperado" : "atenção"}
+                <span className="flex items-center gap-3">
+                  <b className="text-navy">
+                    {fmt(p.value, digits(p.value))} {meta.unit}
+                  </b>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-bold",
+                      ok ? "bg-success/12 text-success" : "bg-warning/15 text-[oklch(0.5_0.13_65)]",
+                    )}
+                  >
+                    {ok ? "esperado" : "atenção"}
+                  </span>
                 </span>
-              </span>
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        {pts.length > 5 && (
+          <button
+            type="button"
+            onClick={() => setShowAll((v) => !v)}
+            className="w-full py-3 text-sm font-semibold text-teal"
+          >
+            {showAll ? "Mostrar menos" : `Ver todas (${pts.length})`}
+          </button>
+        )}
       </div>
     </div>
   );

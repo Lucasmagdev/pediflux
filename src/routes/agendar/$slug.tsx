@@ -183,7 +183,7 @@ function BookingPage() {
               <h2 className="flex items-center gap-2 text-lg font-extrabold">
                 <CalendarDays className="h-5 w-5 text-teal" /> Escolha o dia
               </h2>
-              <div className="-mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2">
+              <div className="-mx-5 mt-3 flex snap-x gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {days.map((d) => {
                   const free = slotsFor(d).length;
                   const dt = parseISO(d);
@@ -233,22 +233,36 @@ function BookingPage() {
                   Selecione um dia para ver os horários livres.
                 </p>
               ) : slots.length ? (
-                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                  {slots.map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setTime(t)}
-                      className={cn(
-                        "rounded-xl border py-2.5 text-sm font-bold transition",
-                        time === t
-                          ? "border-teal bg-teal text-white"
-                          : "border-border bg-card text-navy hover:border-teal/50",
-                      )}
-                    >
-                      {t}
-                    </button>
-                  ))}
+                <div className="mt-3 grid gap-4">
+                  {[
+                    { label: "Manhã", list: slots.filter((t) => timeToMin(t) < 12 * 60) },
+                    { label: "Tarde", list: slots.filter((t) => timeToMin(t) >= 12 * 60) },
+                  ]
+                    .filter((g) => g.list.length)
+                    .map((g) => (
+                      <div key={g.label}>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {g.label}
+                        </p>
+                        <div className="grid grid-cols-4 gap-2">
+                          {g.list.map((t) => (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => setTime(t)}
+                              className={cn(
+                                "rounded-xl border py-2.5 text-sm font-bold transition",
+                                time === t
+                                  ? "border-teal bg-teal text-white"
+                                  : "border-border bg-card text-navy hover:border-teal/50",
+                              )}
+                            >
+                              {t}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                 </div>
               ) : (
                 <p className="mt-3 rounded-xl bg-muted p-4 text-sm text-muted-foreground">

@@ -46,7 +46,7 @@ export function GrowthPanel({ patient }: { patient: Patient }) {
   }, [patient, corrected, settings]);
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <div className="no-print flex flex-wrap items-center gap-3">
         <div className="inline-flex flex-wrap rounded-xl bg-muted p-1">
           {MEASURES.map((m) => (

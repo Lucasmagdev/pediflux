@@ -34,6 +34,8 @@ interface Row {
 /** Janela do eixo X conforme a idade da criança. */
 export function chartWindow(ageMonths: number, measure: GrowthMeasure): number {
   const max = MEASURE_META[measure].maxAge;
+  if (ageMonths <= 5) return 6;
+  if (ageMonths <= 10) return 12;
   if (ageMonths <= 22) return 24;
   if (ageMonths <= 58) return Math.min(60, max);
   return max;
@@ -42,7 +44,7 @@ export function chartWindow(ageMonths: number, measure: GrowthMeasure): number {
 export function GrowthChart({
   patient,
   measure,
-  corrected = false,
+  corrected,
   simple = false,
   height = 380,
 }: {
@@ -61,7 +63,7 @@ export function GrowthChart({
   const meta = MEASURE_META[measure];
 
   const rows = useMemo<Row[]>(() => {
-    const step = win <= 24 ? 0.5 : win <= 60 ? 1 : 3;
+    const step = win <= 12 ? 0.25 : win <= 24 ? 0.5 : win <= 60 ? 1 : 3;
     const ref = (age: number): Row => {
       const r = { age } as Row;
       for (const l of PERCENTILE_LINES) r[l.key] = referenceValue(patient.sex, measure, age, l.z);
@@ -84,7 +86,7 @@ export function GrowthChart({
   }, [rows]);
 
   const ticks = useMemo(() => {
-    const every = win <= 24 ? 3 : 12;
+    const every = win <= 6 ? 1 : win <= 12 ? 2 : win <= 24 ? 3 : 12;
     return Array.from({ length: Math.floor(win / every) + 1 }, (_, i) => i * every);
   }, [win]);
 

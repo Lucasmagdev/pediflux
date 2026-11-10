@@ -55,7 +55,6 @@ function LoginPage() {
       <aside className="relative hidden overflow-hidden bg-gradient-hero p-12 text-navy-foreground lg:flex lg:flex-col">
         <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-teal/30 blur-3xl" />
-        <Logo size="md" onDark className="relative self-start" />
         <div className="relative mt-auto max-w-lg">
           <h1 className="text-4xl font-extrabold leading-tight !text-white">
             Gestão Inteligente para sua Clínica Pediátrica
@@ -84,8 +83,9 @@ function LoginPage() {
 
       {/* Formulário */}
       <main className="flex flex-col items-center justify-center px-4 py-10 sm:px-8">
-        <div className="mb-8 lg:hidden">
-          <Logo size="xl" tagline className="max-w-full" />
+        <div className="mb-8">
+          <Logo size="xl" tagline className="max-w-full lg:hidden" />
+          <Logo size="lg" className="hidden lg:inline-flex" />
         </div>
         <div className="card-surface w-full max-w-md p-6 sm:p-8 animate-fade-up">
           <h2 className="text-2xl font-extrabold">Bem-vinda de volta</h2>

@@ -131,7 +131,7 @@ function PatientPage() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       <Link
         to="/pacientes"
         className="inline-flex w-fit items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-navy"
@@ -226,7 +226,7 @@ function PatientPage() {
       </Card>
 
       {/* Abas */}
-      <div className="no-print -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <div className="no-print -mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
         <div className="inline-flex min-w-full gap-1 border-b border-border sm:min-w-0">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
@@ -300,8 +300,8 @@ function SummaryTab({
   const lastMeasureDate = patient.measurements[patient.measurements.length - 1]?.date;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-      <div className="grid content-start gap-6">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 content-start gap-6">
         <div>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-extrabold">Últimas medidas</h2>
@@ -397,7 +397,7 @@ function SummaryTab({
         </Card>
       </div>
 
-      <div className="grid content-start gap-6">
+      <div className="grid grid-cols-1 content-start gap-6">
         <Card>
           <CardHeader
             title="Informações clínicas"
@@ -485,7 +485,7 @@ function ConsultationsTab({
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {consultations.length} atendimentos no prontuário
@@ -628,7 +628,7 @@ function ClinicalInfoDialog({
           <DialogTitle>Informações clínicas</DialogTitle>
           <DialogDescription>{patient.name}</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <Field label="Alergias (separe por vírgula)">
             <Input
               value={allergies}

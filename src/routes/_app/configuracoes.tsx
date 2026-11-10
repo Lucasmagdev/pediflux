@@ -90,7 +90,7 @@ function SettingsPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
         <nav className="hidden lg:block">
           <ul className="sticky top-24 grid gap-1">
             {SECTIONS.map(({ id, label, icon: Icon }) => (
@@ -106,7 +106,7 @@ function SettingsPage() {
           </ul>
         </nav>
 
-        <div className="grid gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Perfil */}
           <Card>
             <div id="perfil" className="scroll-mt-24" />
@@ -367,6 +367,25 @@ function SettingsPage() {
           </Card>
         </div>
       </div>
+
+      {dirty && (
+        <div className="fixed inset-x-0 bottom-20 z-30 flex justify-center px-4 lg:bottom-6 lg:pl-64">
+          <div className="flex items-center gap-3 rounded-2xl bg-navy px-4 py-3 text-sm text-white shadow-lift animate-fade-up">
+            <span className="font-semibold">Alterações não salvas</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white/80 hover:bg-white/10 hover:text-white"
+              onClick={() => setF(settings)}
+            >
+              Descartar
+            </Button>
+            <Button size="sm" variant="teal" onClick={save}>
+              <Check /> Salvar
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

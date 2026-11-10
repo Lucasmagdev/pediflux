@@ -168,7 +168,7 @@ export function ExamsPanel({ patient }: { patient: Patient }) {
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -204,7 +204,7 @@ export function ExamsPanel({ patient }: { patient: Patient }) {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(["Todos", ...CATEGORIES] as const).map((c) => (
+        {(["Todos", ...CATEGORIES.filter((c) => counts(c) > 0)] as const).map((c) => (
           <button
             key={c}
             type="button"
@@ -225,7 +225,10 @@ export function ExamsPanel({ patient }: { patient: Patient }) {
       {list.length ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
           {list.map((e) => (
-            <Card key={e.id} className="group overflow-hidden transition hover:shadow-lift">
+            <Card
+              key={e.id}
+              className="group relative overflow-hidden transition hover:shadow-lift"
+            >
               <button
                 type="button"
                 onClick={() => setViewing(e)}
@@ -247,26 +250,18 @@ export function ExamsPanel({ patient }: { patient: Patient }) {
                   </div>
                 </div>
               </button>
-              <div className="flex border-t border-border opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100">
-                <button
-                  type="button"
-                  onClick={() => setViewing(e)}
-                  className="flex-1 py-2 text-xs font-semibold text-teal hover:bg-accent"
-                >
-                  Abrir
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    actions.removeExam(e.id);
-                    toast("Arquivo removido");
-                  }}
-                  className="grid w-10 place-items-center border-l border-border text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                  aria-label="Remover arquivo"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  actions.removeExam(e.id);
+                  toast("Arquivo removido");
+                }}
+                className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-lg bg-card/90 text-muted-foreground shadow-soft transition hover:text-destructive focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                aria-label="Remover arquivo"
+                title="Remover"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </Card>
           ))}
         </div>

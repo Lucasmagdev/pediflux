@@ -110,7 +110,7 @@ function TodayPage() {
   );
 
   return (
-    <div className="grid gap-6">
+    <div className="grid grid-cols-1 gap-6">
       {/* Banner de boas-vindas */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-hero p-6 text-white shadow-lift sm:p-8 animate-fade-up">
         <div className="pointer-events-none absolute -right-10 -top-16 h-64 w-64 rounded-full bg-white/10" />
@@ -190,7 +190,7 @@ function TodayPage() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[1.6fr_1fr]">
         {/* Agenda de hoje */}
         <Card>
           <CardHeader
@@ -211,6 +211,10 @@ function TodayPage() {
                 const p = byId(a.patientId);
                 if (!p) return null;
                 const isNow = a.status === "em_atendimento";
+                const isNext = isNow || a.id === next?.id;
+                const reveal = isNext
+                  ? ""
+                  : "hidden sm:inline-flex sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100";
                 return (
                   <li
                     key={a.id}
@@ -246,7 +250,7 @@ function TodayPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-success"
+                        className={cn("h-8 w-8 text-success", reveal)}
                         onClick={() => setWa(a)}
                         aria-label="Lembrar pelo WhatsApp"
                       >
@@ -256,6 +260,7 @@ function TodayPage() {
                         <Button
                           variant={isNow ? "brand" : "soft"}
                           size="sm"
+                          className={reveal}
                           onClick={() => startAttendance(a, navigate)}
                         >
                           <Play />{" "}
@@ -283,7 +288,7 @@ function TodayPage() {
           )}
         </Card>
 
-        <div className="grid content-start gap-6">
+        <div className="grid grid-cols-1 content-start gap-6">
           {/* Solicitações */}
           <Card>
             <CardHeader
@@ -303,17 +308,20 @@ function TodayPage() {
                     <div className="flex items-start gap-3">
                       <Avatar name={r.childName} size="sm" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-bold text-navy">{r.childName}</p>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="font-bold text-navy">{r.childName}</p>
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-teal/10 px-2 py-0.5 text-xs font-bold text-teal">
+                            <Clock className="h-3 w-3" /> {formatDate(r.date).slice(0, 5)} ·{" "}
+                            {r.time}
+                          </span>
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {formatAge(r.childBirth)} · {r.guardianName}
                         </p>
-                        <p className="mt-1 text-sm">{r.reason}</p>
-                        <p className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-teal">
-                          <Clock className="h-3.5 w-3.5" /> {formatDate(r.date)} às {r.time}
-                        </p>
+                        <p className="mt-1 text-sm text-navy/80">{r.reason}</p>
                       </div>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-3 flex items-center gap-2 pl-11">
                       <Button
                         size="sm"
                         variant="teal"
@@ -327,18 +335,20 @@ function TodayPage() {
                         <Check /> Confirmar
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => setSuggest(r)}>
-                        Sugerir outro horário
+                        Outro horário
                       </Button>
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="ghost"
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        aria-label="Recusar pedido"
+                        title="Recusar"
+                        className="ml-auto h-9 w-9 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => {
                           actions.rejectRequest(r.id);
                           toast("Pedido recusado");
                         }}
                       >
-                        <X /> Recusar
+                        <X />
                       </Button>
                     </div>
                   </li>
