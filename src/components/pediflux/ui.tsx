@@ -35,7 +35,15 @@ export function CardHeader({
   );
 }
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+}: {
+  title: string;
+  subtitle?: string;
+  actions?: React.ReactNode;
+}) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
@@ -60,7 +68,11 @@ export function StatCard({
   icon: LucideIcon;
   tone?: "teal" | "warning" | "blue";
 }) {
-  const t = { teal: "bg-teal/10 text-teal", warning: "bg-warning/15 text-warning", blue: "bg-info/10 text-info" }[tone];
+  const t = {
+    teal: "bg-teal/10 text-teal",
+    warning: "bg-warning/15 text-warning",
+    blue: "bg-info/10 text-info",
+  }[tone];
   return (
     <Card className="flex items-center gap-4 p-5">
       <span className={cn("grid h-12 w-12 shrink-0 place-items-center rounded-xl", t)}>
@@ -89,7 +101,9 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center px-6 py-10 text-center", className)}>
+    <div
+      className={cn("flex flex-col items-center justify-center px-6 py-10 text-center", className)}
+    >
       <span className="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-accent text-teal">
         <Icon className="h-7 w-7" />
       </span>
@@ -100,13 +114,38 @@ export function EmptyState({
   );
 }
 
-export function Avatar({ name, sex, size = "md" }: { name: string; sex?: "M" | "F"; size?: "sm" | "md" | "lg" }) {
+export function Avatar({
+  name,
+  sex,
+  size = "md",
+}: {
+  name: string;
+  sex?: "M" | "F";
+  size?: "sm" | "md" | "lg";
+}) {
   const s = { sm: "h-8 w-8 text-xs", md: "h-10 w-10 text-sm", lg: "h-16 w-16 text-xl" }[size];
-  const tone = sex === "F" ? "bg-teal/15 text-teal" : sex === "M" ? "bg-info/12 text-info" : "bg-gradient-brand text-primary-foreground";
-  return <span className={cn("grid shrink-0 place-items-center rounded-full font-bold", s, tone)}>{initials(name)}</span>;
+  const tone =
+    sex === "F"
+      ? "bg-teal/15 text-teal"
+      : sex === "M"
+        ? "bg-info/12 text-info"
+        : "bg-gradient-brand text-primary-foreground";
+  return (
+    <span className={cn("grid shrink-0 place-items-center rounded-full font-bold", s, tone)}>
+      {initials(name)}
+    </span>
+  );
 }
 
-export function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+export function Field({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <label className={cn("grid gap-1.5 text-sm font-medium text-navy", className)}>
       {label}

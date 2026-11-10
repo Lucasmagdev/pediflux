@@ -28,9 +28,30 @@ export function formatDate(iso?: string): string {
   return `${d}/${m}/${y}`;
 }
 
-const WEEKDAYS = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+const WEEKDAYS = [
+  "domingo",
+  "segunda-feira",
+  "terça-feira",
+  "quarta-feira",
+  "quinta-feira",
+  "sexta-feira",
+  "sábado",
+];
 const WEEKDAYS_SHORT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const MONTHS = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+const MONTHS = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+];
 
 export function formatLongDate(iso: string): string {
   const d = parseISO(iso);
@@ -81,7 +102,10 @@ export function firstName(name: string): string {
 }
 
 export function initials(name: string): string {
-  const p = name.replace(/^(Dra?\.)\s*/, "").split(" ").filter(Boolean);
+  const p = name
+    .replace(/^(Dra?\.)\s*/, "")
+    .split(" ")
+    .filter(Boolean);
   return ((p[0]?.[0] ?? "") + (p[p.length - 1]?.[0] ?? "")).toUpperCase();
 }
 

@@ -11,21 +11,44 @@ const AGES = [0, 1, 2, 3, 4, 6, 9, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120,
 
 const MEDIANS: Record<Exclude<GrowthMeasure, "bmi">, Record<Sex, number[]>> = {
   weight: {
-    M: [3.3, 4.5, 5.6, 6.4, 7.0, 7.9, 8.9, 9.6, 10.9, 12.2, 14.3, 16.3, 18.3, 20.5, 22.9, 25.4, 28.1, 31.2, 35.0, 39.0, 44.0],
-    F: [3.2, 4.2, 5.1, 5.8, 6.4, 7.3, 8.2, 8.9, 10.2, 11.5, 13.9, 16.1, 18.2, 20.2, 22.4, 25.0, 28.2, 31.9, 36.0, 41.0, 45.5],
+    M: [
+      3.3, 4.5, 5.6, 6.4, 7.0, 7.9, 8.9, 9.6, 10.9, 12.2, 14.3, 16.3, 18.3, 20.5, 22.9, 25.4, 28.1,
+      31.2, 35.0, 39.0, 44.0,
+    ],
+    F: [
+      3.2, 4.2, 5.1, 5.8, 6.4, 7.3, 8.2, 8.9, 10.2, 11.5, 13.9, 16.1, 18.2, 20.2, 22.4, 25.0, 28.2,
+      31.9, 36.0, 41.0, 45.5,
+    ],
   },
   height: {
-    M: [49.9, 54.7, 58.4, 61.4, 63.9, 67.6, 72.0, 75.7, 82.3, 87.8, 96.1, 103.3, 110.0, 116.0, 121.7, 127.3, 132.6, 137.8, 143.1, 149.1, 156.0],
-    F: [49.1, 53.7, 57.1, 59.8, 62.1, 65.7, 70.1, 74.0, 80.7, 86.4, 95.1, 102.7, 109.4, 115.1, 120.8, 126.6, 132.5, 138.6, 144.8, 151.2, 156.4],
+    M: [
+      49.9, 54.7, 58.4, 61.4, 63.9, 67.6, 72.0, 75.7, 82.3, 87.8, 96.1, 103.3, 110.0, 116.0, 121.7,
+      127.3, 132.6, 137.8, 143.1, 149.1, 156.0,
+    ],
+    F: [
+      49.1, 53.7, 57.1, 59.8, 62.1, 65.7, 70.1, 74.0, 80.7, 86.4, 95.1, 102.7, 109.4, 115.1, 120.8,
+      126.6, 132.5, 138.6, 144.8, 151.2, 156.4,
+    ],
   },
   head: {
-    M: [34.5, 37.3, 39.1, 40.5, 41.6, 43.3, 45.0, 46.1, 47.4, 48.3, 49.5, 50.2, 50.7, 51.1, 51.5, 51.8, 52.1, 52.4, 52.7, 53.0, 53.3],
-    F: [33.9, 36.5, 38.3, 39.5, 40.6, 42.2, 43.8, 44.9, 46.2, 47.2, 48.5, 49.3, 49.9, 50.3, 50.7, 51.0, 51.3, 51.6, 51.9, 52.2, 52.5],
+    M: [
+      34.5, 37.3, 39.1, 40.5, 41.6, 43.3, 45.0, 46.1, 47.4, 48.3, 49.5, 50.2, 50.7, 51.1, 51.5,
+      51.8, 52.1, 52.4, 52.7, 53.0, 53.3,
+    ],
+    F: [
+      33.9, 36.5, 38.3, 39.5, 40.6, 42.2, 43.8, 44.9, 46.2, 47.2, 48.5, 49.3, 49.9, 50.3, 50.7,
+      51.0, 51.3, 51.6, 51.9, 52.2, 52.5,
+    ],
   },
 };
 
 /** Dispersão aproximada (log-normal) por medida */
-const SPREAD: Record<GrowthMeasure, number> = { weight: 0.12, height: 0.04, head: 0.03, bmi: 0.085 };
+const SPREAD: Record<GrowthMeasure, number> = {
+  weight: 0.12,
+  height: 0.04,
+  head: 0.03,
+  bmi: 0.085,
+};
 
 function interp(arr: number[], age: number): number {
   const a = Math.max(0, Math.min(age, AGES[AGES.length - 1]));
@@ -58,7 +81,8 @@ export function zScore(sex: Sex, measure: GrowthMeasure, age: number, value: num
 function normCdf(z: number): number {
   const t = 1 / (1 + 0.2316419 * Math.abs(z));
   const d = 0.3989423 * Math.exp((-z * z) / 2);
-  const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  const p =
+    d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
   return z > 0 ? 1 - p : p;
 }
 
@@ -92,7 +116,10 @@ export function lineIndex(z: number): number {
   return PERCENTILE_LINES.findIndex((l) => l.label === nearestLine(z));
 }
 
-export const MEASURE_META: Record<GrowthMeasure, { label: string; short: string; unit: string; maxAge: number }> = {
+export const MEASURE_META: Record<
+  GrowthMeasure,
+  { label: string; short: string; unit: string; maxAge: number }
+> = {
   weight: { label: "Peso x idade", short: "Peso", unit: "kg", maxAge: 156 },
   height: { label: "Comprimento/Estatura x idade", short: "Altura", unit: "cm", maxAge: 156 },
   head: { label: "Perímetro cefálico x idade", short: "PC", unit: "cm", maxAge: 60 },

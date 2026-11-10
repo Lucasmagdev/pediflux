@@ -10,33 +10,131 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppAgendaRouteImport } from './routes/_app/agenda'
+import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
+import { Route as AppHojeRouteImport } from './routes/_app/hoje'
+import { Route as AgendarSlugRouteImport } from './routes/agendar/$slug'
+import { Route as PTokenRouteImport } from './routes/p/$token'
+import { Route as AppPacientesIndexRouteImport } from './routes/_app/pacientes/index'
+import { Route as AppPacientesIdRouteImport } from './routes/_app/pacientes/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAgendaRoute = AppAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHojeRoute = AppHojeRouteImport.update({
+  id: '/hoje',
+  path: '/hoje',
+  getParentRoute: () => AppRoute,
+} as any)
+const AgendarSlugRoute = AgendarSlugRouteImport.update({
+  id: '/agendar/$slug',
+  path: '/agendar/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PTokenRoute = PTokenRouteImport.update({
+  id: '/p/$token',
+  path: '/p/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppPacientesIndexRoute = AppPacientesIndexRouteImport.update({
+  id: '/pacientes/',
+  path: '/pacientes/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPacientesIdRoute = AppPacientesIdRouteImport.update({
+  id: '/pacientes/$id',
+  path: '/pacientes/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agenda': typeof AppAgendaRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
+  '/hoje': typeof AppHojeRoute
+  '/agendar/$slug': typeof AgendarSlugRoute
+  '/p/$token': typeof PTokenRoute
+  '/pacientes/$id': typeof AppPacientesIdRoute
+  '/pacientes/': typeof AppPacientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agenda': typeof AppAgendaRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
+  '/hoje': typeof AppHojeRoute
+  '/agendar/$slug': typeof AgendarSlugRoute
+  '/p/$token': typeof PTokenRoute
+  '/pacientes/$id': typeof AppPacientesIdRoute
+  '/pacientes': typeof AppPacientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/agenda': typeof AppAgendaRoute
+  '/_app/configuracoes': typeof AppConfiguracoesRoute
+  '/_app/hoje': typeof AppHojeRoute
+  '/agendar/$slug': typeof AgendarSlugRoute
+  '/p/$token': typeof PTokenRoute
+  '/_app/pacientes/$id': typeof AppPacientesIdRoute
+  '/_app/pacientes/': typeof AppPacientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/agenda'
+    | '/configuracoes'
+    | '/hoje'
+    | '/agendar/$slug'
+    | '/p/$token'
+    | '/pacientes/$id'
+    | '/pacientes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/agenda'
+    | '/configuracoes'
+    | '/hoje'
+    | '/agendar/$slug'
+    | '/p/$token'
+    | '/pacientes/$id'
+    | '/pacientes'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/agenda'
+    | '/_app/configuracoes'
+    | '/_app/hoje'
+    | '/agendar/$slug'
+    | '/p/$token'
+    | '/_app/pacientes/$id'
+    | '/_app/pacientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AgendarSlugRoute: typeof AgendarSlugRoute
+  PTokenRoute: typeof PTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +146,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/agenda': {
+      id: '/_app/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AppAgendaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/configuracoes': {
+      id: '/_app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/hoje': {
+      id: '/_app/hoje'
+      path: '/hoje'
+      fullPath: '/hoje'
+      preLoaderRoute: typeof AppHojeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/agendar/$slug': {
+      id: '/agendar/$slug'
+      path: '/agendar/$slug'
+      fullPath: '/agendar/$slug'
+      preLoaderRoute: typeof AgendarSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$token': {
+      id: '/p/$token'
+      path: '/p/$token'
+      fullPath: '/p/$token'
+      preLoaderRoute: typeof PTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/pacientes/': {
+      id: '/_app/pacientes/'
+      path: '/pacientes'
+      fullPath: '/pacientes/'
+      preLoaderRoute: typeof AppPacientesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/pacientes/$id': {
+      id: '/_app/pacientes/$id'
+      path: '/pacientes/$id'
+      fullPath: '/pacientes/$id'
+      preLoaderRoute: typeof AppPacientesIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAgendaRoute: typeof AppAgendaRoute
+  AppConfiguracoesRoute: typeof AppConfiguracoesRoute
+  AppHojeRoute: typeof AppHojeRoute
+  AppPacientesIdRoute: typeof AppPacientesIdRoute
+  AppPacientesIndexRoute: typeof AppPacientesIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAgendaRoute: AppAgendaRoute,
+  AppConfiguracoesRoute: AppConfiguracoesRoute,
+  AppHojeRoute: AppHojeRoute,
+  AppPacientesIdRoute: AppPacientesIdRoute,
+  AppPacientesIndexRoute: AppPacientesIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AgendarSlugRoute: AgendarSlugRoute,
+  PTokenRoute: PTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

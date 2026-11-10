@@ -42,7 +42,15 @@ export const TONE_BLOCK: Record<Tone, string> = {
   teal: "bg-teal/10 border-l-teal",
 };
 
-export function Pill({ tone = "neutral", className, children }: { tone?: Tone; className?: string; children: React.ReactNode }) {
+export function Pill({
+  tone = "neutral",
+  className,
+  children,
+}: {
+  tone?: Tone;
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
     <span
       className={cn(
@@ -56,7 +64,13 @@ export function Pill({ tone = "neutral", className, children }: { tone?: Tone; c
   );
 }
 
-export function StatusBadge({ status, className }: { status: AppointmentStatus; className?: string }) {
+export function StatusBadge({
+  status,
+  className,
+}: {
+  status: AppointmentStatus;
+  className?: string;
+}) {
   const m = STATUS_META[status];
   return (
     <Pill tone={m.tone} className={className}>

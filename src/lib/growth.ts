@@ -41,7 +41,11 @@ export interface GrowthPoint {
   percentile: number;
 }
 
-export function patientPoints(p: Patient, measure: GrowthMeasure, corrected = false): GrowthPoint[] {
+export function patientPoints(
+  p: Patient,
+  measure: GrowthMeasure,
+  corrected = false,
+): GrowthPoint[] {
   return [...p.measurements]
     .sort((a, b) => a.date.localeCompare(b.date))
     .flatMap((m) => {
@@ -58,7 +62,11 @@ export interface GrowthAlert {
   text: string;
 }
 
-export function growthAlert(p: Patient, measure: GrowthMeasure, corrected = false): GrowthAlert | null {
+export function growthAlert(
+  p: Patient,
+  measure: GrowthMeasure,
+  corrected = false,
+): GrowthAlert | null {
   const pts = patientPoints(p, measure, corrected);
   if (!pts.length) return null;
   const last = pts[pts.length - 1];
@@ -69,7 +77,8 @@ export function growthAlert(p: Patient, measure: GrowthMeasure, corrected = fals
     };
   }
   if (pts.length >= 2) {
-    const prev = pts[pts.length - 2];
+    // compara com até 2 consultas atrás para pegar quedas graduais de canal
+    const prev = pts[Math.max(0, pts.length - 3)];
     if (lineIndex(last.z) < lineIndex(prev.z) && prev.z - last.z > 0.6) {
       return {
         level: "warning",
@@ -88,5 +97,8 @@ export function formatPercentile(p: number): string {
 
 export function fmt(n: number | undefined, digits = 1): string {
   if (n == null) return "—";
-  return n.toLocaleString("pt-BR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  return n.toLocaleString("pt-BR", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 }

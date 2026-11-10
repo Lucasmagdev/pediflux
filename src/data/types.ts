@@ -1,12 +1,7 @@
 export type Sex = "M" | "F";
 
 export type AppointmentStatus =
-  | "agendado"
-  | "confirmado"
-  | "aguardando"
-  | "em_atendimento"
-  | "atendido"
-  | "faltou";
+  "agendado" | "confirmado" | "aguardando" | "em_atendimento" | "atendido" | "faltou";
 
 export type AppointmentType = "Puericultura" | "Doença aguda" | "Retorno" | "Vacina";
 

@@ -1,48 +1,84 @@
 import { cn } from "@/lib/utils";
 
-/** Logo provisória do PediFlux — substitua apenas este componente pela logo final. */
-export function LogoMark({ className }: { className?: string }) {
+/**
+ * Marca oficial do PediFlux (arquivos em /public/brand, gerados de marca/pediflux-logo-original.png).
+ * Em fundos escuros ou coloridos use `tile` (ícone) ou `onDark` (logo) — a marca vai sobre branco.
+ */
+export function LogoMark({ className, tile = false }: { className?: string; tile?: boolean }) {
+  const img = (
+    <img
+      src="/brand/pediflux-mark.png"
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      className={cn("h-9 w-9 object-contain", !tile && className)}
+    />
+  );
+  if (!tile) return img;
   return (
-    <svg viewBox="0 0 48 48" className={cn("h-9 w-9", className)} aria-hidden="true">
-      <defs>
-        <linearGradient id="pf-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#16B9B3" />
-          <stop offset="1" stopColor="#1E6FD9" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M18 4h12a2 2 0 0 1 2 2v10h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H32v10a2 2 0 0 1-2 2H18a2 2 0 0 1-2-2V32H6a2 2 0 0 1-2-2V18a2 2 0 0 1 2-2h10V6a2 2 0 0 1 2-2z"
-        fill="url(#pf-grad)"
+    <span
+      className={cn(
+        "inline-grid h-10 w-10 shrink-0 place-items-center rounded-[28%] bg-white shadow-soft",
+        className,
+      )}
+    >
+      <img
+        src="/brand/pediflux-mark.png"
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className="h-[78%] w-[78%] object-contain"
       />
-      <circle cx="24" cy="23" r="8.5" fill="#fff" />
-      <circle cx="21" cy="21.5" r="1.1" fill="#0B2E5E" />
-      <circle cx="27" cy="21.5" r="1.1" fill="#0B2E5E" />
-      <path d="M20.8 25.2c1.8 2 4.6 2 6.4 0" stroke="#0B2E5E" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-      <path d="M23 14.8c.6-1.2 2.2-1.2 2.4 0" stroke="#0B2E5E" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-      <path d="M33 36c0 4 3 6 6 5" stroke="#fff" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <circle cx="39.5" cy="40.5" r="2.2" fill="#fff" />
-    </svg>
+    </span>
   );
 }
+
+const HEIGHTS = { sm: "h-7", md: "h-9", lg: "h-14", xl: "h-20" } as const;
 
 export function Logo({
   className,
   size = "md",
-  inverted = false,
+  onDark = false,
+  tagline = false,
 }: {
   className?: string;
-  size?: "sm" | "md" | "lg";
-  inverted?: boolean;
+  size?: keyof typeof HEIGHTS;
+  /** Coloca a logo sobre uma pílula branca (para fundos escuros). */
+  onDark?: boolean;
+  /** Versão com o slogan "Gestão Inteligente para sua Clínica Pediátrica". */
+  tagline?: boolean;
 }) {
-  const mark = { sm: "h-7 w-7", md: "h-9 w-9", lg: "h-14 w-14" }[size];
-  const text = { sm: "text-lg", md: "text-xl", lg: "text-4xl" }[size];
+  const img = (
+    <img
+      src={tagline ? "/brand/pediflux-logo.png" : "/brand/pediflux-logo-horizontal.png"}
+      alt={tagline ? "PediFlux — Gestão Inteligente para sua Clínica Pediátrica" : "PediFlux"}
+      draggable={false}
+      className={cn("w-auto object-contain", HEIGHTS[size])}
+    />
+  );
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
-      <LogoMark className={mark} />
-      <span className={cn("font-extrabold tracking-tight", text)}>
-        <span className={inverted ? "text-navy-foreground" : "text-navy"}>Pedi</span>
-        <span className="text-teal">Flux</span>
-      </span>
+    <span
+      className={cn(
+        "inline-flex items-center",
+        onDark && "rounded-xl bg-white px-3 py-2 shadow-soft",
+        className,
+      )}
+    >
+      {img}
     </span>
+  );
+}
+
+/** Tela de carregamento com a marca (rotas renderizadas só no cliente). */
+export function AppLoading() {
+  return (
+    <div className="grid min-h-screen place-items-center bg-surface">
+      <div className="flex flex-col items-center gap-5 animate-fade-up">
+        <Logo size="lg" />
+        <span className="h-1 w-32 overflow-hidden rounded-full bg-muted">
+          <span className="block h-full w-1/2 animate-pulse rounded-full bg-gradient-brand" />
+        </span>
+      </div>
+    </div>
   );
 }

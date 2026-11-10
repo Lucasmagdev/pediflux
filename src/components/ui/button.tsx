@@ -16,7 +16,8 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-teal underline-offset-4 hover:underline",
-        brand: "bg-gradient-brand text-primary-foreground shadow-soft hover:shadow-lift hover:brightness-105",
+        brand:
+          "bg-gradient-brand text-primary-foreground shadow-soft hover:shadow-lift hover:brightness-105",
         teal: "bg-teal text-primary-foreground shadow-soft hover:bg-teal/90",
         soft: "bg-accent text-accent-foreground hover:bg-accent/70",
         success: "bg-success text-primary-foreground hover:bg-success/90",

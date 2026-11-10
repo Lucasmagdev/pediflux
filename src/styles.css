@@ -94,8 +94,11 @@
   --info: oklch(0.56 0.18 258);
   --surface: oklch(0.979 0.006 240);
   --gradient-brand: linear-gradient(120deg, var(--teal), var(--brand-blue));
-  --gradient-hero: radial-gradient(1200px 600px at 10% -10%, oklch(0.71 0.12 187 / 0.9), transparent 60%), linear-gradient(135deg, oklch(0.56 0.18 258), oklch(0.31 0.09 258));
-  --shadow-soft-v: 0 1px 2px oklch(0.31 0.09 258 / 0.04), 0 4px 16px -6px oklch(0.31 0.09 258 / 0.08);
+  --gradient-hero:
+    radial-gradient(1200px 600px at 10% -10%, oklch(0.71 0.12 187 / 0.9), transparent 60%),
+    linear-gradient(135deg, oklch(0.56 0.18 258), oklch(0.31 0.09 258));
+  --shadow-soft-v:
+    0 1px 2px oklch(0.31 0.09 258 / 0.04), 0 4px 16px -6px oklch(0.31 0.09 258 / 0.08);
   --shadow-lift-v: 0 12px 32px -12px oklch(0.31 0.09 258 / 0.25);
   --band-outer: oklch(0.56 0.18 258 / 0.07);
   --band-inner: oklch(0.56 0.18 258 / 0.14);
@@ -135,15 +138,40 @@
   --sidebar-ring: oklch(0.71 0.12 187);
 }
 
---chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+.dark {
+  --background: oklch(0.2 0.05 258);
+  --foreground: oklch(0.96 0.01 240);
+  --card: oklch(0.25 0.06 258);
+  --card-foreground: oklch(0.96 0.01 240);
+  --popover: oklch(0.25 0.06 258);
+  --popover-foreground: oklch(0.96 0.01 240);
+  --primary: oklch(0.71 0.12 187);
+  --primary-foreground: oklch(0.2 0.05 258);
+  --secondary: oklch(0.3 0.06 258);
+  --secondary-foreground: oklch(0.96 0.01 240);
+  --muted: oklch(0.3 0.05 258);
+  --muted-foreground: oklch(0.72 0.03 250);
+  --accent: oklch(0.32 0.06 230);
+  --accent-foreground: oklch(0.96 0.01 240);
+  --destructive: oklch(0.65 0.2 23);
+  --destructive-foreground: oklch(0.98 0.005 240);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.71 0.12 187);
+  --surface: oklch(0.23 0.055 258);
+  --chart-1: oklch(0.71 0.12 187);
+  --chart-2: oklch(0.65 0.17 258);
+  --chart-3: oklch(0.85 0.05 240);
+  --chart-4: oklch(0.79 0.16 72);
+  --chart-5: oklch(0.69 0.14 158);
+  --sidebar: oklch(0.17 0.05 258);
+  --sidebar-foreground: oklch(0.88 0.02 245);
+  --sidebar-primary: oklch(0.71 0.12 187);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.27 0.06 258);
+  --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --sidebar-ring: oklch(0.71 0.12 187);
 }
 
 @layer base {
@@ -158,13 +186,29 @@
 }
 
 @layer base {
-  html { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
-  h1, h2, h3, h4 { color: var(--color-navy); letter-spacing: -0.01em; }
-  :focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--color-navy);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
 }
 
-@utility bg-gradient-brand { background-image: var(--gradient-brand); }
-@utility bg-gradient-hero { background-image: var(--gradient-hero); }
+@utility bg-gradient-brand {
+  background-image: var(--gradient-brand);
+}
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
+}
 @utility text-gradient-brand {
   background-image: var(--gradient-brand);
   -webkit-background-clip: text;
@@ -178,12 +222,34 @@
   box-shadow: var(--shadow-soft-v);
 }
 
-@keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@utility animate-fade-up { animation: fade-up 0.35s ease-out both; }
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility animate-fade-up {
+  animation: fade-up 0.35s ease-out both;
+}
 
 @media print {
-  body * { visibility: hidden; }
-  .print-area, .print-area * { visibility: visible; }
-  .print-area { position: absolute; inset: 0; padding: 24px; }
-  .no-print { display: none !important; }
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    padding: 24px;
+  }
+  .no-print {
+    display: none !important;
+  }
 }

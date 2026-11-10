@@ -85,7 +85,8 @@ export function getState() {
 let counter = 0;
 const uid = (p: string) => `${p}-${Date.now().toString(36)}-${(counter++).toString(36)}`;
 
-const sortAppts = (a: Appointment[]) => [...a].sort((x, y) => (x.date + x.time).localeCompare(y.date + y.time));
+const sortAppts = (a: Appointment[]) =>
+  [...a].sort((x, y) => (x.date + x.time).localeCompare(y.date + y.time));
 
 export const actions = {
   openNewAppt(draft: Omit<NewApptDraft, "open"> = {}) {
@@ -103,12 +104,16 @@ export const actions = {
     return appt;
   },
   updateAppointment(id: string, patch: Partial<Appointment>) {
-    set((s) => ({ appointments: sortAppts(s.appointments.map((a) => (a.id === id ? { ...a, ...patch } : a))) }));
+    set((s) => ({
+      appointments: sortAppts(s.appointments.map((a) => (a.id === id ? { ...a, ...patch } : a))),
+    }));
   },
   removeAppointment(id: string) {
     set((s) => ({ appointments: s.appointments.filter((a) => a.id !== id) }));
   },
-  addPatient(p: Omit<Patient, "id" | "measurements" | "createdAt"> & { measurements?: Measurement[] }): Patient {
+  addPatient(
+    p: Omit<Patient, "id" | "measurements" | "createdAt"> & { measurements?: Measurement[] },
+  ): Patient {
     const id = uid("p");
     const measurements: Measurement[] =
       p.measurements ??
@@ -126,14 +131,23 @@ export const actions = {
     set((s) => ({
       patients: s.patients.map((p) =>
         p.id === patientId
-          ? { ...p, measurements: [...p.measurements, { ...m, id: uid("m") }].sort((a, b) => a.date.localeCompare(b.date)) }
+          ? {
+              ...p,
+              measurements: [...p.measurements, { ...m, id: uid("m") }].sort((a, b) =>
+                a.date.localeCompare(b.date),
+              ),
+            }
           : p,
       ),
     }));
   },
   saveConsultation(c: Omit<Consultation, "id"> & { id?: string }) {
     if (c.id) {
-      set((s) => ({ consultations: s.consultations.map((x) => (x.id === c.id ? ({ ...x, ...c } as Consultation) : x)) }));
+      set((s) => ({
+        consultations: s.consultations.map((x) =>
+          x.id === c.id ? ({ ...x, ...c } as Consultation) : x,
+        ),
+      }));
       return;
     }
     const nc = { ...c, id: uid("c") } as Consultation;
@@ -186,7 +200,28 @@ export const actions = {
   updateSettings(patch: Partial<Settings>) {
     set((s) => ({ settings: { ...s.settings, ...patch } }));
   },
+  removeExam(id: string) {
+    set((s) => ({ exams: s.exams.filter((e) => e.id !== id) }));
+  },
+  /** Retorna o token do portal da família (gera um novo se ainda não existir). */
+  ensurePortalToken(phone: string): string {
+    const existing = Object.entries(state.portalTokens).find(([, ph]) => ph === phone)?.[0];
+    if (existing) return existing;
+    const token = Math.random().toString(36).slice(2, 8);
+    set((s) => ({ portalTokens: { ...s.portalTokens, [token]: phone } }));
+    return token;
+  },
+  revokePortalToken(phone: string) {
+    set((s) => ({
+      portalTokens: Object.fromEntries(
+        Object.entries(s.portalTokens).filter(([, ph]) => ph !== phone),
+      ),
+    }));
+  },
 };
+
+export const portalTokenFor = (s: State, phone: string) =>
+  Object.entries(s.portalTokens).find(([, ph]) => ph === phone)?.[0];
 
 /* Seletores reutilizáveis */
 export const siblingsOf = (s: State, p: Patient) =>

@@ -1,0 +1,21 @@
+# Deploy do PediFlux no Netlify.
+# O build (TanStack Start + Nitro) gera os arquivos estáticos em `dist/` e a função
+# de SSR em `.netlify/functions-internal/server` (detectada automaticamente pelo Netlify).
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NITRO_PRESET = "netlify"
+
+[[headers]]
+  for = "/brand/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
