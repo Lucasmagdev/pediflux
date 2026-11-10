@@ -13,6 +13,13 @@ export interface Measurement {
   head?: number; // cm
 }
 
+export interface Vitals {
+  hr?: number; // frequência cardíaca (bpm)
+  temp?: number; // temperatura axilar (°C)
+  spo2?: number; // saturação (%)
+  rr?: number; // frequência respiratória (irpm)
+}
+
 export interface Consultation {
   id: string;
   patientId: string;
@@ -25,6 +32,8 @@ export interface Consultation {
   plan: string;
   returnIn?: string;
   measurement?: Omit<Measurement, "id" | "date">;
+  /** Sinais vitais aferidos na consulta */
+  vitals?: Vitals;
   sharedWithParent: boolean;
 }
 

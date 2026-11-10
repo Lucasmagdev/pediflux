@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, Field, PageHeader } from "@/components/pediflux/ui";
 import { STATUS_META, TONE_BLOCK } from "@/components/pediflux/StatusBadge";
+import { TYPE_STYLE } from "@/components/pediflux/typeStyle";
 import { AppointmentDetailDialog } from "@/components/pediflux/appointments";
 import { WhatsAppReminderDialog } from "@/components/pediflux/dialogs";
 import { actions, useStore } from "@/data/store";
@@ -410,6 +411,7 @@ function DayColumn({
             className={cn(
               "absolute inset-x-1 overflow-hidden rounded-lg border border-l-4 border-border/60 px-2 py-1 text-left shadow-soft transition hover:z-10 hover:shadow-lift",
               TONE_BLOCK[tone],
+              TYPE_STYLE[a.type].bg,
               a.status === "faltou" && "line-through decoration-destructive/50",
             )}
             style={{ top: top + 1, height: h }}

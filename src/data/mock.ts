@@ -2,7 +2,7 @@
  * Dados fictícios de demonstração. Tudo aqui é substituível por um banco real:
  * as telas só conhecem o formato definido em ./types.ts e as ações do ./store.ts.
  */
-import { addDaysISO, todayISO, timeToMin } from "@/lib/age";
+import { addDaysISO, ageInMonths, todayISO, timeToMin } from "@/lib/age";
 import { referenceValue } from "./growth-reference";
 import type {
   Appointment,
@@ -299,6 +299,40 @@ export const CONSULT_TEMPLATES: {
   { name: "Retorno", type: "Retorno", data: TEMPLATES.Retorno },
 ];
 
+/** Sinais vitais plausíveis para a idade (e febre na doença aguda). */
+function vitalsFor(ageMonths: number, acute: boolean, seed: number): Consultation["vitals"] {
+  const rnd = seeded(seed);
+  const j = (n: number) => (rnd() - 0.5) * n;
+  const base = (pairs: [number, number][]) => {
+    for (let i = 0; i < pairs.length - 1; i++) {
+      const [a0, v0] = pairs[i]!;
+      const [a1, v1] = pairs[i + 1]!;
+      if (ageMonths <= a1) return v0 + ((ageMonths - a0) / (a1 - a0)) * (v1 - v0);
+    }
+    return pairs[pairs.length - 1]![1];
+  };
+  const hr = base([
+    [0, 140],
+    [12, 120],
+    [36, 105],
+    [72, 95],
+    [144, 82],
+  ]);
+  const rr = base([
+    [0, 44],
+    [12, 30],
+    [36, 25],
+    [72, 22],
+    [144, 18],
+  ]);
+  return {
+    hr: Math.round(hr + j(10) + (acute ? 14 : 0)),
+    rr: Math.round(rr + j(4) + (acute ? 4 : 0)),
+    temp: Math.round((acute ? 38.2 + j(0.6) : 36.5 + j(0.4)) * 10) / 10,
+    spo2: Math.round(acute ? 96 + j(2) : 98 + j(2)),
+  };
+}
+
 export const mockConsultations: Consultation[] = mockPatients.flatMap((p) => {
   const ms = p.measurements.slice(-4);
   return ms
@@ -313,6 +347,11 @@ export const mockConsultations: Consultation[] = mockPatients.flatMap((p) => {
         type,
         ...tpl,
         measurement: { weight: m.weight, height: m.height, head: m.head },
+        vitals: vitalsFor(
+          ageInMonths(p.birthDate, m.date),
+          type === "Doença aguda",
+          Number(p.id.slice(1)) * 97 + i * 31 + 11,
+        ),
         sharedWithParent: type === "Puericultura",
       };
     })

@@ -81,6 +81,13 @@
   --color-surface: var(--surface);
   --shadow-soft: var(--shadow-soft-v);
   --shadow-lift: var(--shadow-lift-v);
+  --color-frame: var(--frame);
+  --color-cream: var(--cream);
+  --color-peach: var(--peach);
+  --color-sky: var(--sky);
+  --color-rose: var(--rose);
+  --color-lavender: var(--lavender);
+  --color-orange: var(--orange);
 }
 
 :root {
@@ -103,6 +110,15 @@
   --band-outer: oklch(0.56 0.18 258 / 0.07);
   --band-inner: oklch(0.56 0.18 258 / 0.14);
   --band-line: oklch(0.56 0.18 258 / 0.35);
+  /* Moldura e tons pastel (linguagem "Health+") */
+  --frame: oklch(0.9 0.035 195);
+  --cream: oklch(0.985 0.008 85);
+  --peach: oklch(0.955 0.04 70);
+  --sky: oklch(0.95 0.04 200);
+  --rose: oklch(0.955 0.03 5);
+  --lavender: oklch(0.955 0.03 290);
+  --orange: oklch(0.74 0.16 55);
+  --gradient-teal: linear-gradient(140deg, oklch(0.8 0.11 190), oklch(0.62 0.12 200));
 
   --background: oklch(0.979 0.006 240);
   --foreground: oklch(0.27 0.06 258);
@@ -251,5 +267,15 @@
   }
   .no-print {
     display: none !important;
+  }
+}
+
+@utility bg-gradient-teal {
+  background-image: var(--gradient-teal);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }

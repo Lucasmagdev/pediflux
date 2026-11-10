@@ -38,6 +38,8 @@ import { Pill } from "@/components/pediflux/StatusBadge";
 import { ConsultationEditor } from "@/components/pediflux/ConsultationEditor";
 import { GrowthPanel } from "@/components/pediflux/GrowthPanel";
 import { ExamsPanel } from "@/components/pediflux/ExamsPanel";
+import { GrowthDiagnosis, VitalsCard, VitalsHistory } from "@/components/pediflux/HealthOverview";
+import { TYPE_STYLE } from "@/components/pediflux/typeStyle";
 import { MEASURE_META, type GrowthMeasure } from "@/data/growth-reference";
 import { actions, portalTokenFor, siblingsOf, useStore } from "@/data/store";
 import type { Consultation, Patient } from "@/data/types";
@@ -296,119 +298,23 @@ function SummaryTab({
   onEditInfo: () => void;
   goTab: (t: TabKey) => void;
 }) {
-  const measures: GrowthMeasure[] = ["weight", "height", "head", "bmi"];
-  const lastMeasureDate = patient.measurements[patient.measurements.length - 1]?.date;
-
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
-      <div className="grid grid-cols-1 content-start gap-6">
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-extrabold">Últimas medidas</h2>
-            <span className="text-xs text-muted-foreground">
-              {lastMeasureDate ? `em ${formatDate(lastMeasureDate)}` : "sem medições"}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {measures.map((m) => {
-              const pts = patientPoints(patient, m);
-              const last = pts[pts.length - 1];
-              const alert = growthAlert(patient, m);
-              return (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => goTab("crescimento")}
-                  className="card-surface p-4 text-left transition hover:-translate-y-0.5 hover:shadow-lift"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {MEASURE_META[m].short}
-                  </p>
-                  <p className="mt-1 text-2xl font-extrabold text-navy">
-                    {last ? fmt(last.value, m === "weight" && last.value < 20 ? 2 : 1) : "—"}
-                    <span className="ml-1 text-xs font-semibold text-muted-foreground">
-                      {MEASURE_META[m].unit}
-                    </span>
-                  </p>
-                  {last && (
-                    <span
-                      className={cn(
-                        "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold",
-                        alert?.level === "danger"
-                          ? "bg-destructive/10 text-destructive"
-                          : alert
-                            ? "bg-warning/15 text-[oklch(0.5_0.13_65)]"
-                            : "bg-success/12 text-success",
-                      )}
-                    >
-                      {alert && <AlertTriangle className="h-3 w-3" />}
-                      {formatPercentile(last.percentile)}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader
-            title="Últimos atendimentos"
-            icon={Stethoscope}
-            action={
-              <Button variant="ghost" size="sm" onClick={() => goTab("consultas")}>
-                Ver todos
-              </Button>
-            }
-          />
-          {consultations.length ? (
-            <ul className="divide-y divide-border">
-              {consultations.slice(0, 3).map((c) => (
-                <li key={c.id} className="flex gap-4 px-5 py-4">
-                  <div className="w-16 shrink-0 text-center">
-                    <p className="text-lg font-extrabold leading-none text-navy">
-                      {c.date.slice(8, 10)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{formatDate(c.date).slice(3)}</p>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Pill
-                        tone={
-                          c.type === "Doença aguda"
-                            ? "warning"
-                            : c.type === "Vacina"
-                              ? "info"
-                              : "teal"
-                        }
-                      >
-                        {c.type}
-                      </Pill>
-                    </div>
-                    <p className="mt-1 text-sm font-semibold text-navy">{c.diagnosis}</p>
-                    <p className="line-clamp-2 text-sm text-muted-foreground">{c.plan}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState icon={Stethoscope} title="Nenhum atendimento registrado" />
-          )}
-        </Card>
+    <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_1fr]">
+        <GrowthDiagnosis patient={patient} onOpen={() => goTab("crescimento")} />
+        <VitalsCard consultations={consultations} />
       </div>
 
-      <div className="grid grid-cols-1 content-start gap-6">
-        <Card>
-          <CardHeader
-            title="Informações clínicas"
-            icon={HeartPulse}
-            action={
-              <Button variant="ghost" size="sm" onClick={onEditInfo}>
-                <Pencil /> Editar
-              </Button>
-            }
-          />
-          <dl className="grid gap-4 p-5 text-sm">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <VitalsHistory consultations={consultations} />
+        <Card className="p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-bold">Informações clínicas</h2>
+            <Button variant="ghost" size="sm" onClick={onEditInfo}>
+              <Pencil /> Editar
+            </Button>
+          </div>
+          <dl className="grid gap-4 text-sm">
             <div>
               <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Alergias
@@ -435,15 +341,29 @@ function SummaryTab({
             </div>
           </dl>
         </Card>
-        <Card>
-          <CardHeader title="Nascimento" icon={Baby} />
-          <dl className="grid grid-cols-3 gap-3 p-5 text-center">
-            {[
-              ["Idade gest.", patient.gestationalWeeks ? `${patient.gestationalWeeks} sem` : "—"],
-              ["Peso", patient.birthWeight ? `${fmt(patient.birthWeight, 3)} kg` : "—"],
-              ["Comprimento", patient.birthLength ? `${fmt(patient.birthLength)} cm` : "—"],
-            ].map(([k, v]) => (
-              <div key={k} className="rounded-xl bg-muted p-3">
+        <Card className="p-5 md:col-span-2 xl:col-span-1">
+          <h2 className="mb-3 text-base font-bold">Nascimento</h2>
+          <dl className="grid grid-cols-3 gap-3 text-center">
+            {(
+              [
+                [
+                  "Idade gest.",
+                  patient.gestationalWeeks ? `${patient.gestationalWeeks} sem` : "—",
+                  "bg-lavender",
+                ],
+                [
+                  "Peso",
+                  patient.birthWeight ? `${fmt(patient.birthWeight, 3)} kg` : "—",
+                  "bg-peach",
+                ],
+                [
+                  "Comprimento",
+                  patient.birthLength ? `${fmt(patient.birthLength)} cm` : "—",
+                  "bg-sky",
+                ],
+              ] as const
+            ).map(([k, v, bg]) => (
+              <div key={k} className={cn("rounded-2xl p-3", bg)}>
                 <dt className="text-[11px] font-semibold uppercase text-muted-foreground">{k}</dt>
                 <dd className="mt-1 text-sm font-extrabold text-navy">{v}</dd>
               </div>
@@ -451,6 +371,65 @@ function SummaryTab({
           </dl>
         </Card>
       </div>
+
+      <Card className="p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-bold">Últimos atendimentos</h2>
+          <Button variant="ghost" size="sm" onClick={() => goTab("consultas")}>
+            Ver todos
+          </Button>
+        </div>
+        {consultations.length ? (
+          <ul className="grid grid-cols-1 gap-3">
+            {consultations.slice(0, 3).map((c) => {
+              const st = TYPE_STYLE[c.type];
+              return (
+                <li key={c.id} className="grid grid-cols-[56px_1fr] items-center gap-3">
+                  <div className="text-center">
+                    <p className="text-lg font-extrabold leading-none text-navy">
+                      {c.date.slice(8, 10)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{formatDate(c.date).slice(3)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => goTab("consultas")}
+                    className={cn(
+                      "flex min-w-0 items-center gap-3 rounded-2xl p-3 text-left transition hover:brightness-[0.98]",
+                      st.bg,
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-card shadow-soft",
+                        st.tint,
+                      )}
+                    >
+                      <st.icon className="h-5 w-5" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold text-navy">
+                        {c.diagnosis}
+                      </span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {c.type} · {c.plan}
+                      </span>
+                    </span>
+                    {c.vitals?.hr != null && (
+                      <span className="hidden shrink-0 rounded-full bg-card/80 px-2.5 py-1 text-xs font-bold text-navy sm:inline">
+                        {c.vitals.hr} bpm
+                        {c.vitals.temp != null && ` · ${fmt(c.vitals.temp, 1)} °C`}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <EmptyState icon={Stethoscope} title="Nenhum atendimento registrado" />
+        )}
+      </Card>
     </div>
   );
 }

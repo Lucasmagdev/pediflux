@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Eye, FileText, Ruler, Sparkles } from "lucide-react";
+import { Eye, FileText, HeartPulse, Ruler, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,6 +36,10 @@ const EMPTY = {
   weight: "",
   height: "",
   head: "",
+  hr: "",
+  temp: "",
+  spo2: "",
+  rr: "",
   sharedWithParent: true,
 };
 
@@ -96,6 +100,10 @@ export function ConsultationEditor({
         weight: toStr(editing.measurement?.weight),
         height: toStr(editing.measurement?.height),
         head: toStr(editing.measurement?.head),
+        hr: toStr(editing.vitals?.hr),
+        temp: toStr(editing.vitals?.temp),
+        spo2: toStr(editing.vitals?.spo2),
+        rr: toStr(editing.vitals?.rr),
         sharedWithParent: editing.sharedWithParent,
       });
     } else {
@@ -119,6 +127,8 @@ export function ConsultationEditor({
       return;
     }
     const measurement = { weight: num(f.weight), height: num(f.height), head: num(f.head) };
+    const vitals = { hr: num(f.hr), temp: num(f.temp), spo2: num(f.spo2), rr: num(f.rr) };
+    const hasVitals = Object.values(vitals).some((v) => v != null);
     actions.saveConsultation({
       id: editing?.id,
       patientId: patient.id,
@@ -132,6 +142,7 @@ export function ConsultationEditor({
       returnIn: f.returnIn || undefined,
       measurement:
         measurement.weight || measurement.height || measurement.head ? measurement : undefined,
+      vitals: hasVitals ? vitals : undefined,
       sharedWithParent: f.sharedWithParent,
     });
     if (f.nextReturn) actions.updatePatient(patient.id, { nextReturn: f.nextReturn });
@@ -245,6 +256,32 @@ export function ConsultationEditor({
                 {bmi ? `${fmt(bmi, 1)} kg/m²` : "—"}
               </div>
             </Field>
+          </div>
+        </div>
+
+        {/* Sinais vitais */}
+        <div className="rounded-2xl bg-rose/70 p-4">
+          <p className="mb-3 flex items-center gap-2 text-sm font-bold text-navy">
+            <HeartPulse className="h-4 w-4 text-destructive" /> Sinais vitais
+          </p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {(
+              [
+                ["hr", "FC (bpm)", "120"],
+                ["temp", "Temp. (°C)", "36,5"],
+                ["spo2", "SpO₂ (%)", "98"],
+                ["rr", "FR (irpm)", "30"],
+              ] as const
+            ).map(([k, label, ph]) => (
+              <Field key={k} label={label}>
+                <Input
+                  inputMode="decimal"
+                  placeholder={ph}
+                  value={f[k]}
+                  onChange={(e) => setF({ ...f, [k]: e.target.value })}
+                />
+              </Field>
+            ))}
           </div>
         </div>
 

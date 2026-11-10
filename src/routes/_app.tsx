@@ -1,7 +1,9 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Bell,
   CalendarDays,
+  ChevronDown,
   Home,
   LogOut,
   Menu,
@@ -51,22 +53,25 @@ function AppLayout() {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen bg-surface">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-sidebar text-sidebar-foreground lg:flex">
-        <SidebarContent />
-      </aside>
+    <div className="min-h-screen bg-surface lg:bg-frame lg:p-5">
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="left" className="w-72 border-0 bg-sidebar p-0 text-sidebar-foreground">
+        <SheetContent side="left" className="w-72 border-0 bg-cream p-0">
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <SidebarContent />
         </SheetContent>
       </Sheet>
 
-      <div className="lg:pl-64">
-        <Topbar onMenu={() => setMenuOpen(true)} />
-        <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 lg:pb-16 sm:px-6 lg:px-8">
-          <Outlet />
-        </main>
+      {/* Moldura do app (desktop): cartão branco arredondado sobre fundo teal suave */}
+      <div className="mx-auto flex min-h-screen max-w-[1480px] lg:min-h-[calc(100vh-2.5rem)] lg:overflow-clip lg:rounded-[2rem] lg:bg-card lg:shadow-[0_30px_80px_-30px_oklch(0.31_0.09_258/0.35)]">
+        <aside className="sticky top-5 hidden h-[calc(100vh-2.5rem)] w-60 shrink-0 border-r border-border/70 bg-cream lg:block">
+          <SidebarContent />
+        </aside>
+        <div className="flex min-w-0 flex-1 flex-col bg-surface">
+          <Topbar onMenu={() => setMenuOpen(true)} />
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-2 sm:px-6 lg:px-8 lg:pb-10">
+            <Outlet />
+          </main>
+        </div>
       </div>
       <MobileNav />
       <NewAppointmentDialog />
@@ -79,13 +84,13 @@ function SidebarContent() {
   const requests = useStore((s) => s.requests.length);
   const plan = useStore((s) => s.settings.plan);
   return (
-    <div className="flex h-full flex-col">
-      <div className="px-6 py-6">
+    <div className="flex h-full flex-col py-6">
+      <div className="px-6 pb-8">
         <Link to="/hoje" aria-label="PediFlux — início">
-          <Logo size="sm" onDark />
+          <Logo size="md" />
         </Link>
       </div>
-      <nav className="grid gap-1 px-3">
+      <nav className="grid gap-1">
         {NAV.map(({ to, label, icon: Icon }) => {
           const active = pathname === to || pathname.startsWith(`${to}/`);
           return (
@@ -93,47 +98,44 @@ function SidebarContent() {
               key={to}
               to={to}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
+                "relative mx-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
                 active
-                  ? "bg-sidebar-accent text-white"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-white",
+                  ? "bg-teal/10 font-bold text-navy"
+                  : "font-medium text-muted-foreground hover:bg-muted hover:text-navy",
               )}
             >
-              <span
-                className={cn(
-                  "grid h-8 w-8 place-items-center rounded-lg transition",
-                  active
-                    ? "bg-teal text-white"
-                    : "bg-white/5 text-sidebar-foreground/80 group-hover:text-white",
-                )}
-              >
-                <Icon className="h-4 w-4" />
-              </span>
+              <Icon className={cn("h-[18px] w-[18px]", active && "text-teal")} />
               {label}
               {to === "/hoje" && requests > 0 && (
-                <span className="ml-auto rounded-full bg-warning px-2 py-0.5 text-xs font-bold text-navy">
+                <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-orange px-1.5 text-[11px] font-bold text-white">
                   {requests}
                 </span>
+              )}
+              {active && (
+                <span className="absolute -right-3 top-1/2 h-7 w-1 -translate-y-1/2 rounded-l-full bg-teal" />
               )}
             </Link>
           );
         })}
       </nav>
-      <div className="mt-auto p-4">
-        <div className="rounded-2xl bg-gradient-brand p-4 text-white shadow-lift">
-          <div className="flex items-center gap-2 text-sm font-bold">
-            <Sparkles className="h-4 w-4" /> {plan.name}
-          </div>
-          <p className="mt-1 text-xs text-white/85">
-            Assinatura {plan.status.toLowerCase()} · renova em {formatDate(plan.renewal)}
-          </p>
-          <Link
-            to="/configuracoes"
-            className="mt-3 inline-flex rounded-lg bg-white/20 px-3 py-1.5 text-xs font-semibold hover:bg-white/30"
-          >
-            Ver assinatura
-          </Link>
-        </div>
+      <div className="mt-auto grid gap-3 px-4">
+        <Link
+          to="/configuracoes"
+          className="rounded-2xl border border-teal/20 bg-teal/8 p-4 transition hover:bg-teal/12"
+        >
+          <span className="flex items-center gap-2 text-sm font-bold text-navy">
+            <Sparkles className="h-4 w-4 text-teal" /> {plan.name}
+          </span>
+          <span className="mt-1 block text-xs text-muted-foreground">
+            Renova em {formatDate(plan.renewal)}
+          </span>
+        </Link>
+        <Link
+          to="/"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-navy"
+        >
+          <LogOut className="h-[18px] w-[18px]" /> Sair
+        </Link>
       </div>
     </div>
   );
@@ -141,10 +143,11 @@ function SidebarContent() {
 
 function Topbar({ onMenu }: { onMenu: () => void }) {
   const settings = useStore((s) => s.settings);
+  const requests = useStore((s) => s.requests.length);
   const navigate = useNavigate();
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-card/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:h-20 lg:px-8">
         <Button
           variant="ghost"
           size="icon"
@@ -159,46 +162,53 @@ function Topbar({ onMenu }: { onMenu: () => void }) {
           <Logo size="sm" className="hidden sm:inline-flex" />
         </Link>
         <GlobalSearch />
-        <Button
-          variant="brand"
-          className="ml-auto hidden sm:inline-flex"
-          onClick={() => actions.openNewAppt()}
-        >
-          <Plus /> Nova consulta
-        </Button>
-        <Button
-          variant="brand"
-          size="icon"
-          className="ml-auto sm:hidden"
-          onClick={() => actions.openNewAppt()}
-          aria-label="Nova consulta"
-        >
-          <Plus />
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 rounded-full p-0.5 outline-none ring-teal focus-visible:ring-2">
-            <Avatar name={settings.doctorName} size="md" />
-            <span className="hidden text-left leading-tight xl:block">
-              <span className="block text-sm font-bold text-navy">{settings.doctorShort}</span>
-              <span className="block text-xs text-muted-foreground">{settings.crm}</span>
-            </span>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>
-              {settings.doctorName}
-              <span className="block text-xs font-normal text-muted-foreground">
-                {settings.specialty}
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <Link
+            to="/hoje"
+            className="relative grid h-10 w-10 place-items-center rounded-full bg-card text-navy shadow-soft transition hover:text-teal"
+            aria-label={`${requests} pedidos de agendamento`}
+          >
+            <Bell className="h-[18px] w-[18px]" />
+            {requests > 0 && (
+              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-orange ring-2 ring-card" />
+            )}
+          </Link>
+          <Button
+            variant="brand"
+            size="icon"
+            className="h-10 w-10 rounded-full"
+            onClick={() => actions.openNewAppt()}
+            aria-label="Nova consulta"
+            title="Nova consulta"
+          >
+            <Plus />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 rounded-full p-0.5 pr-1 outline-none ring-teal focus-visible:ring-2">
+              <Avatar name={settings.doctorName} size="md" />
+              <span className="hidden text-left leading-tight xl:block">
+                <span className="block text-sm font-bold text-navy">{settings.doctorShort}</span>
+                <span className="block text-xs text-muted-foreground">{settings.crm}</span>
               </span>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate({ to: "/configuracoes" })}>
-              <SettingsIcon /> Configurações
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate({ to: "/" })}>
-              <LogOut /> Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <ChevronDown className="hidden h-4 w-4 text-muted-foreground xl:block" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                {settings.doctorName}
+                <span className="block text-xs font-normal text-muted-foreground">
+                  {settings.specialty}
+                </span>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate({ to: "/configuracoes" })}>
+                <SettingsIcon /> Configurações
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/" })}>
+                <LogOut /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );
@@ -241,7 +251,7 @@ function GlobalSearch() {
 
   return (
     <div ref={ref} className="relative hidden w-full max-w-md md:block">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         value={q}
         onChange={(e) => {
@@ -257,7 +267,7 @@ function GlobalSearch() {
           if (e.key === "Escape") setOpen(false);
         }}
         placeholder="Buscar paciente, mãe ou pai…"
-        className="h-10 rounded-xl border-transparent bg-muted pl-9 focus-visible:border-teal focus-visible:bg-card"
+        className="h-11 rounded-full border-transparent bg-card pl-10 shadow-soft focus-visible:border-teal"
         aria-label="Buscar paciente"
       />
       {open && q.trim() && (
