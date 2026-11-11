@@ -74,12 +74,31 @@ Teste grátis: 7 dias no plano Pro, criado automaticamente no cadastro.
 | `portal_snapshot(token)`            | anônimo com token      | tudo que a família pode ver (só o compartilhado)     |
 | `portal_exam_path(token, exame)`    | só servidor            | caminho do arquivo para URL assinada                 |
 
-## Fluxo de venda (prateleira)
+## Cobrança (Mercado Pago · Assinaturas)
 
-1. Cliente compra na Monetizze/Hotmart → **webhook** cria/convida o usuário e marca
-   `subscriptions.status = active` com o plano comprado.
-2. Ou cria conta direto no site → `create_clinic` → 7 dias de teste.
-3. Cancelamento/estorno → webhook marca `canceled` → somente leitura.
+Aplicação **PediFlux** no Mercado Pago (id 1490964653264128), solução _Assinaturas_.
+
+```
+/planos (lê billing_plans) → link do plano (preapproval_plan) → cliente paga no MP
+   → webhook "Planos e assinaturas" → Edge Function mp-webhook
+   → valida x-signature (HMAC) → consulta GET /preapproval/{id} → billing_apply()
+   → purchases + subscriptions (plano, status, próximo vencimento)
+```
+
+- **Vínculo compra ↔ clínica = e-mail.** Comprou antes de criar a conta: `create_clinic`
+  já cria a clínica com o plano pago (sem trial). Comprou depois: `billing_apply` atualiza.
+- **Estados:** `authorized` → active · `paused` → past_due (ainda grava) · `cancelled` →
+  canceled (somente leitura, nada é apagado).
+- **Catálogo:** `billing_plans` (6 planos: Essencial/Plus/Pro × mensal/anual) com `mp_plan_id`
+  e `checkout_url`. Trocar preço = criar novo plano no MP e atualizar a linha.
+- **Segredos** (Supabase → Edge Functions → Secrets): `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`.
+  Nunca no repositório nem no front.
+- **Modo atual: TESTE.** As credenciais são de uma conta de teste do Mercado Pago. Para vender
+  de verdade: ativar _Credenciais de produção_ no painel (dados do negócio), trocar
+  `MP_ACCESS_TOKEN`, cadastrar a URL também em _Modo de produção_ dos Webhooks (gera outra
+  assinatura secreta → trocar `MP_WEBHOOK_SECRET`) e recriar os planos com o token de produção.
+- `back_url` dos planos aponta para `https://pediflux.netlify.app/obrigado` (provisório):
+  atualizar com o domínio real (PUT /preapproval_plan/{id}).
 
 ## Ambientes
 
@@ -93,6 +112,7 @@ Variáveis do front: ver `.env.example` (configurar também no Netlify).
 
 ## Próximos passos
 
+0. Domínio final do Netlify → atualizar `back_url` dos planos e o Site URL do Supabase Auth.
 1. Trocar a camada mock (`src/data/store.ts`) por Supabase, mantendo as mesmas telas.
 2. Login real + tela de primeiro acesso (`create_clinic`).
 3. Edge Functions `billing-webhook` e `portal-file`.

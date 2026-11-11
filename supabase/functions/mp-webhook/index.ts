@@ -73,7 +73,9 @@ Deno.serve(async (req) => {
   const sub = await mp.json();
 
   const status = String(sub.status ?? "");
-  const email = String(sub.payer_email ?? "").trim().toLowerCase();
+  const email = String(sub.payer_email ?? "")
+    .trim()
+    .toLowerCase();
   const planId = String(sub.preapproval_plan_id ?? "");
   if (!email || !planId || !["pending", "authorized", "paused", "cancelled"].includes(status)) {
     return json({ ok: true, ignored: "incomplete subscription" });

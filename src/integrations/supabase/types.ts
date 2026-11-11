@@ -74,6 +74,39 @@ export type Database = {
           },
         ]
       }
+      billing_plans: {
+        Row: {
+          active: boolean
+          amount: number
+          billing_interval: string
+          checkout_url: string | null
+          code: string
+          mp_plan_id: string | null
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount: number
+          billing_interval: string
+          checkout_url?: string | null
+          code: string
+          mp_plan_id?: string | null
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          billing_interval?: string
+          checkout_url?: string | null
+          code?: string
+          mp_plan_id?: string | null
+          tier?: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       booking_requests: {
         Row: {
           child_birth: string
@@ -565,6 +598,45 @@ export type Database = {
           },
         ]
       }
+      purchases: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          mp_plan_id: string | null
+          next_payment_at: string | null
+          provider: string
+          provider_subscription: string
+          status: string
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          mp_plan_id?: string | null
+          next_payment_at?: string | null
+          provider?: string
+          provider_subscription: string
+          status: string
+          tier: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          mp_plan_id?: string | null
+          next_payment_at?: string | null
+          provider?: string
+          provider_subscription?: string
+          status?: string
+          tier?: Database["public"]["Enums"]["plan_tier"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           clinic_id: string
@@ -652,6 +724,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      billing_apply: {
+        Args: {
+          p_email: string
+          p_mp_plan: string
+          p_next_payment: string
+          p_provider_subscription: string
+          p_status: string
+          p_tier: Database["public"]["Enums"]["plan_tier"]
+        }
+        Returns: undefined
+      }
+      billing_user_exists: { Args: { p_email: string }; Returns: boolean }
       create_booking_request: {
         Args: {
           p_child_birth: string
