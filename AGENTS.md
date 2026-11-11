@@ -28,3 +28,17 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Regras do projeto PediFlux (prevalecem sobre o bloco acima)
+
+- **Banco de dados é nosso, não do Lovable.** O PediFlux usa um projeto Supabase próprio.
+  O esquema vive em `supabase/migrations/` neste repositório e é a fonte da verdade —
+  crie uma nova migration para cada mudança (nunca edite uma já aplicada).
+  Depois de mudar o esquema, regenere `src/integrations/supabase/types.ts`.
+- **Sistema de prateleira.** Um único banco e um único código para todas as clínicas.
+  Nada de customização por cliente: o que varia é só o plano (`plan_allows` em
+  `supabase/migrations/*_rls.sql`) e as configurações da própria clínica.
+- **Segurança:** toda tabela tem RLS; acesso público só por RPC `security definer`.
+  Prontuário (pacientes, famílias, consultas, medidas) não pode ser excluído.
+- **Segredos:** nunca versionar `.env.local`, service role key nem tokens de acesso.
+- Arquitetura detalhada: `docs/ARQUITETURA.md`.

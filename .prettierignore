@@ -6,3 +6,6 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+
+# gerado pelo Supabase
+src/integrations/supabase/types.ts

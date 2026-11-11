@@ -139,8 +139,8 @@ function LoginPage() {
             </Button>
           </form>
           <p className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 text-success" /> Dados protegidos e armazenados no
-            Brasil
+            <ShieldCheck className="h-4 w-4 text-success" /> Dados criptografados e isolados por
+            clínica
           </p>
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground">
