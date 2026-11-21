@@ -1,4 +1,11 @@
-import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  redirect,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Bell,
@@ -27,16 +34,46 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { actions, useStore } from "@/data/store";
+import { actions, ensureClinic, useStore } from "@/data/store";
 import { formatAge, formatDate } from "@/lib/age";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app")({
-  // Dados de demonstração vivem no navegador (data/fuso do usuário): renderiza só no cliente.
+  // Sessão e dados vivem no navegador (data/fuso do usuário): renderiza só no cliente.
   ssr: false,
+  beforeLoad: async ({ location }) => {
+    const status = await ensureClinic();
+    if (status === "anon") throw redirect({ to: "/", search: { next: location.href } });
+    if (status === "no-clinic") throw redirect({ to: "/bem-vindo" });
+  },
   pendingComponent: AppLoading,
   component: AppLayout,
 });
+
+function useSignOut() {
+  const navigate = useNavigate();
+  return async () => {
+    await actions.signOut();
+    navigate({ to: "/" });
+  };
+}
+
+function PlanBanner() {
+  const plan = useStore((s) => s.settings.plan);
+  if (plan.writable) return null;
+  return (
+    <div className="mx-4 mb-2 flex flex-wrap items-center gap-3 rounded-2xl border border-orange/30 bg-peach px-4 py-3 text-sm text-navy sm:mx-6 lg:mx-8">
+      <Sparkles className="h-4 w-4 shrink-0 text-orange" />
+      <span className="flex-1">
+        <b>{plan.status}.</b> Seus dados continuam aqui, mas novas alterações ficam bloqueadas até
+        você assinar um plano.
+      </span>
+      <Button size="sm" variant="brand" asChild>
+        <a href="/planos">Ver planos</a>
+      </Button>
+    </div>
+  );
+}
 
 const NAV = [
   { to: "/hoje", label: "Hoje", icon: Home },
@@ -68,6 +105,7 @@ function AppLayout() {
         </aside>
         <div className="flex min-w-0 flex-1 flex-col bg-surface">
           <Topbar onMenu={() => setMenuOpen(true)} />
+          <PlanBanner />
           <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-2 sm:px-6 lg:px-8 lg:pb-10">
             <Outlet />
           </main>
@@ -83,6 +121,7 @@ function SidebarContent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const requests = useStore((s) => s.requests.length);
   const plan = useStore((s) => s.settings.plan);
+  const signOut = useSignOut();
   return (
     <div className="flex h-full flex-col py-6">
       <div className="px-6 pb-8">
@@ -127,15 +166,16 @@ function SidebarContent() {
             <Sparkles className="h-4 w-4 text-teal" /> {plan.name}
           </span>
           <span className="mt-1 block text-xs text-muted-foreground">
-            Renova em {formatDate(plan.renewal)}
+            {plan.renewal ? `${plan.renewalLabel} ${formatDate(plan.renewal)}` : plan.status}
           </span>
         </Link>
-        <Link
-          to="/"
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-navy"
+        <button
+          type="button"
+          onClick={signOut}
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-muted-foreground hover:bg-muted hover:text-navy"
         >
           <LogOut className="h-[18px] w-[18px]" /> Sair
-        </Link>
+        </button>
       </div>
     </div>
   );
@@ -145,6 +185,7 @@ function Topbar({ onMenu }: { onMenu: () => void }) {
   const settings = useStore((s) => s.settings);
   const requests = useStore((s) => s.requests.length);
   const navigate = useNavigate();
+  const signOut = useSignOut();
   return (
     <header className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:h-20 lg:px-8">
@@ -203,7 +244,7 @@ function Topbar({ onMenu }: { onMenu: () => void }) {
               <DropdownMenuItem onClick={() => navigate({ to: "/configuracoes" })}>
                 <SettingsIcon /> Configurações
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate({ to: "/" })}>
+              <DropdownMenuItem onClick={signOut}>
                 <LogOut /> Sair
               </DropdownMenuItem>
             </DropdownMenuContent>

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Download, FileText, ImageIcon, MessageCircle, Trash2, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,13 @@ import {
 import { Card, EmptyState } from "./ui";
 import { Pill } from "./StatusBadge";
 import { LogoMark } from "./Logo";
-import { actions, fillMessage, useStore } from "@/data/store";
+import { actions, examUrl, fillMessage, openExam, useStore } from "@/data/store";
 import type { ExamFile, Patient } from "@/data/types";
 import { firstName, formatDate, todayISO, whatsappLink } from "@/lib/age";
 import { cn } from "@/lib/utils";
+
+/** Mesmo limite do bucket `exams` no Supabase. */
+const MAX_BYTES = 20 * 1024 * 1024;
 
 const CATEGORIES: ExamFile["category"][] = [
   "Exame de sangue",
@@ -73,6 +76,15 @@ export function ExamViewer({
   onClose: () => void;
 }) {
   const settings = useStore((s) => s.settings);
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    setUrl(null);
+    if (exam) examUrl(exam).then((u) => alive && setUrl(u));
+    return () => {
+      alive = false;
+    };
+  }, [exam]);
   return (
     <Dialog open={!!exam} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-2xl">
@@ -83,33 +95,27 @@ export function ExamViewer({
           </DialogDescription>
         </DialogHeader>
         {exam &&
-          (exam.kind === "image" ? (
-            <ExamThumb exam={exam} className="h-80 rounded-2xl" />
-          ) : (
-            <div className="max-h-[55vh] overflow-y-auto rounded-2xl bg-muted p-4 sm:p-6">
-              <div className="mx-auto max-w-md rounded-lg bg-card p-6 shadow-soft">
-                <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
-                  <span className="flex items-center gap-2 text-sm font-bold text-navy">
-                    <LogoMark className="h-6 w-6" /> {settings.clinicName}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{formatDate(exam.date)}</span>
-                </div>
-                <p className="text-base font-extrabold text-navy">{exam.name}</p>
-                <p className="mb-4 text-xs text-muted-foreground">Paciente: {patient.name}</p>
-                {[95, 80, 88, 60, 92, 75, 84, 50].map((w, i) => (
-                  <div key={i} className="mb-2 h-2 rounded bg-muted" style={{ width: `${w}%` }} />
-                ))}
-                <p className="mt-6 text-center text-xs text-muted-foreground">
-                  Pré-visualização de demonstração
-                </p>
-              </div>
+          (!url ? (
+            <div className="grid h-80 place-items-center rounded-2xl bg-muted text-sm text-muted-foreground">
+              <span className="flex items-center gap-2">
+                <LogoMark className="h-6 w-6 animate-pulse" /> Carregando arquivo…
+              </span>
             </div>
+          ) : exam.kind === "image" ? (
+            <img
+              src={url}
+              alt={exam.name}
+              className="max-h-[60vh] w-full rounded-2xl bg-muted object-contain"
+            />
+          ) : (
+            <iframe
+              src={url}
+              title={exam.name}
+              className="h-[60vh] w-full rounded-2xl border border-border bg-muted"
+            />
           ))}
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => toast.success("Download iniciado (demonstração)")}
-          >
+          <Button variant="outline" onClick={() => exam && openExam(exam, true)}>
             <Download /> Baixar
           </Button>
           <Button variant="success" asChild>
@@ -142,6 +148,7 @@ export function ExamsPanel({ patient }: { patient: Patient }) {
   const [filter, setFilter] = useState<ExamFile["category"] | "Todos">("Todos");
   const [drag, setDrag] = useState(false);
   const [viewing, setViewing] = useState<ExamFile | null>(null);
+  const [uploading, setUploading] = useState(0);
   const input = useRef<HTMLInputElement>(null);
 
   const list = exams
@@ -149,22 +156,38 @@ export function ExamsPanel({ patient }: { patient: Patient }) {
     .sort((a, b) => b.date.localeCompare(a.date));
   const counts = (c: string) => exams.filter((e) => e.category === c).length;
 
-  function addFiles(files: FileList | null) {
+  async function addFiles(files: FileList | null) {
     if (!files?.length) return;
-    for (const file of Array.from(files)) {
+    const list = Array.from(files);
+    const tooBig = list.filter((f) => f.size > MAX_BYTES);
+    if (tooBig.length) {
+      toast.error(`Arquivo acima de 20 MB: ${tooBig.map((f) => f.name).join(", ")}`);
+    }
+    const ok = list.filter((f) => f.size <= MAX_BYTES);
+    if (!ok.length) return;
+    setUploading((n) => n + ok.length);
+    let sent = 0;
+    for (const file of ok) {
       const kind: ExamFile["kind"] = file.type.startsWith("image/") ? "image" : "pdf";
-      const name = file.name.replace(/\.[^.]+$/, "");
-      actions.addExam({
-        patientId: patient.id,
-        name,
-        kind,
-        category: guessCategory(name, kind),
-        date: todayISO(),
+      const name = file.name.replace(/\.[^.]+$/, "").slice(0, 200) || "Arquivo";
+      const done = await actions.addExam(
+        {
+          patientId: patient.id,
+          name,
+          kind,
+          category: guessCategory(name, kind),
+          date: todayISO(),
+        },
+        file,
+      );
+      if (done) sent++;
+      setUploading((n) => n - 1);
+    }
+    if (sent) {
+      toast.success(sent > 1 ? `${sent} arquivos enviados` : "Arquivo enviado", {
+        description: "Disponível na ficha do paciente.",
       });
     }
-    toast.success(files.length > 1 ? `${files.length} arquivos enviados` : "Arquivo enviado", {
-      description: "Disponível na ficha do paciente.",
-    });
   }
 
   return (
@@ -191,13 +214,17 @@ export function ExamsPanel({ patient }: { patient: Patient }) {
         <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-brand text-white shadow-soft">
           <UploadCloud className="h-6 w-6" />
         </span>
-        <p className="font-bold text-navy">Arraste exames e documentos aqui</p>
-        <p className="text-sm text-muted-foreground">ou clique para escolher · PDF, JPG ou PNG</p>
+        <p className="font-bold text-navy">
+          {uploading ? `Enviando ${uploading} arquivo(s)…` : "Arraste exames e documentos aqui"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          ou clique para escolher · PDF, JPG ou PNG até 20 MB
+        </p>
         <input
           ref={input}
           type="file"
           multiple
-          accept=".pdf,image/*"
+          accept="application/pdf,image/jpeg,image/png,image/webp,image/heic"
           className="hidden"
           onChange={(e) => addFiles(e.target.files)}
         />

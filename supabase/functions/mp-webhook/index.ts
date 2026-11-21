@@ -105,9 +105,15 @@ Deno.serve(async (req) => {
   if (error) return json({ error: error.message }, 500);
 
   // Compra nova de quem ainda não tem conta: convida por e-mail (melhor esforço).
+  // O link do convite leva a /nova-senha (cria a senha) e de lá ao primeiro acesso (/bem-vindo).
   if (status === "authorized") {
     const { data: existing } = await db.rpc("billing_user_exists", { p_email: email });
-    if (!existing) await db.auth.admin.inviteUserByEmail(email).catch(() => null);
+    const site = Deno.env.get("SITE_URL") ?? "https://pediflux.com";
+    if (!existing) {
+      await db.auth.admin
+        .inviteUserByEmail(email, { redirectTo: `${site}/nova-senha` })
+        .catch(() => null);
+    }
   }
 
   return json({ ok: true, status, tier: plan.tier });

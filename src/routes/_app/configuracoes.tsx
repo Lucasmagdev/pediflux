@@ -118,22 +118,9 @@ function SettingsPage() {
             <div className="grid gap-5 p-5">
               <div className="flex items-center gap-4">
                 <Avatar name={f.doctorName} size="lg" />
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toast("Envio de foto disponível na versão final")}
-                  >
-                    <UploadCloud /> Trocar foto
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toast("Envio de logo disponível na versão final")}
-                  >
-                    <UploadCloud /> Logo do consultório
-                  </Button>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  As iniciais do seu nome aparecem no link público e no portal da família.
+                </p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Nome de exibição">
@@ -253,7 +240,7 @@ function SettingsPage() {
               <Field label="Endereço do seu link">
                 <div className="flex overflow-hidden rounded-lg border border-input focus-within:ring-1 focus-within:ring-ring">
                   <span className="hidden items-center bg-muted px-3 text-sm text-muted-foreground sm:flex">
-                    pediflux.app/agendar/
+                    pediflux.com/agendar/
                   </span>
                   <input
                     className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
@@ -336,29 +323,63 @@ function SettingsPage() {
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-lg font-extrabold text-navy">{settings.plan.name}</p>
-                    <Pill tone="success">{settings.plan.status}</Pill>
+                    <Pill tone={settings.plan.writable ? "success" : "warning"}>
+                      {settings.plan.status}
+                    </Pill>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {settings.plan.price} · renova em {formatDate(settings.plan.renewal)}
+                    {[
+                      settings.plan.price,
+                      settings.plan.renewal &&
+                        `${settings.plan.renewalLabel.toLowerCase()} ${formatDate(settings.plan.renewal)}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </p>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => toast("Gestão da assinatura disponível na versão final")}
-              >
-                Gerenciar assinatura
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button variant={settings.plan.status === "Ativa" ? "outline" : "brand"} asChild>
+                  <a href="/planos">
+                    {settings.plan.status === "Ativa" ? "Mudar de plano" : "Assinar agora"}
+                  </a>
+                </Button>
+                {settings.plan.status !== "Teste grátis" && (
+                  <Button variant="ghost" asChild>
+                    <a
+                      href="https://www.mercadopago.com.br/subscriptions"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Gerenciar no Mercado Pago
+                    </a>
+                  </Button>
+                )}
+              </div>
             </div>
             <ul className="grid gap-2 border-t border-border bg-muted/40 p-5 text-sm sm:grid-cols-2">
-              {[
-                "Agenda e link de agendamento",
-                "Prontuário com modelos de puericultura",
-                "Curvas de crescimento automáticas",
-                "Portal da família",
-                "Exames e documentos ilimitados",
-                "Suporte por WhatsApp",
-              ].map((i) => (
+              {(settings.plan.tier === "essencial"
+                ? [
+                    "Agenda e link de agendamento",
+                    "Prontuário com modelos de puericultura",
+                    "Curvas de crescimento automáticas",
+                    "Sinais vitais e exames",
+                    "5 GB de armazenamento",
+                  ]
+                : settings.plan.tier === "plus"
+                  ? [
+                      "Tudo do Essencial",
+                      "Portal da família",
+                      "Relatórios básicos",
+                      "20 GB de armazenamento",
+                    ]
+                  : [
+                      "Tudo do Plus",
+                      "Portal da família",
+                      "Modelos de prontuário próprios",
+                      "100 GB de armazenamento",
+                    ]
+              ).map((i) => (
                 <li key={i} className="flex items-center gap-2 text-navy">
                   <Check className="h-4 w-4 text-success" /> {i}
                 </li>

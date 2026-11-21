@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Field } from "./ui";
-import { CONSULT_TEMPLATES } from "@/data/mock";
+import { CONSULT_TEMPLATES } from "@/data/templates";
 import { actions } from "@/data/store";
 import type { AppointmentType, Consultation, Patient } from "@/data/types";
 import { formatAge, todayISO } from "@/lib/age";

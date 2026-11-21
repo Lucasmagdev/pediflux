@@ -44,10 +44,14 @@ export interface ExamFile {
   date: string;
   kind: "pdf" | "image";
   category: "Exame de sangue" | "Imagem" | "Laudo" | "Receita" | "Atestado" | "Outro";
+  /** Caminho no bucket privado `exams` (ausente no portal: lá o arquivo vem por URL assinada). */
+  storagePath?: string;
 }
 
 export interface Patient {
   id: string;
+  /** Família (responsável + telefone) compartilhada entre irmãos. */
+  familyId?: string;
   name: string;
   birthDate: string;
   sex: Sex;
@@ -115,5 +119,20 @@ export interface Settings {
   defaultDuration: number;
   hours: WorkingDay[]; // index 0 = domingo
   messages: { reminder: string; return: string; result: string };
-  plan: { name: string; status: "Ativa"; renewal: string; price: string };
+  plan: PlanInfo;
+}
+
+export type PlanTier = "essencial" | "plus" | "pro";
+
+export interface PlanInfo {
+  tier: PlanTier | null;
+  name: string;
+  /** Rótulo amigável: Teste grátis, Ativa, Pagamento pendente, Cancelada, Teste encerrado. */
+  status: string;
+  /** Pode gravar dados (teste válido, ativa ou pagamento pendente). */
+  writable: boolean;
+  /** Data do fim do teste ou da próxima cobrança. */
+  renewal?: string;
+  renewalLabel: string;
+  price: string;
 }

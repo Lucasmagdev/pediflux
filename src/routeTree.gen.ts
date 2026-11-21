@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as BemVindoRouteImport } from './routes/bem-vindo'
+import { Route as NovaSenhaRouteImport } from './routes/nova-senha'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as PlanosRouteImport } from './routes/planos'
 import { Route as AppAgendaRouteImport } from './routes/_app/agenda'
@@ -28,6 +30,16 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BemVindoRoute = BemVindoRouteImport.update({
+  id: '/bem-vindo',
+  path: '/bem-vindo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NovaSenhaRoute = NovaSenhaRouteImport.update({
+  id: '/nova-senha',
+  path: '/nova-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ObrigadoRoute = ObrigadoRouteImport.update({
@@ -78,6 +90,8 @@ const AppPacientesIdRoute = AppPacientesIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bem-vindo': typeof BemVindoRoute
+  '/nova-senha': typeof NovaSenhaRoute
   '/obrigado': typeof ObrigadoRoute
   '/planos': typeof PlanosRoute
   '/agenda': typeof AppAgendaRoute
@@ -90,6 +104,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bem-vindo': typeof BemVindoRoute
+  '/nova-senha': typeof NovaSenhaRoute
   '/obrigado': typeof ObrigadoRoute
   '/planos': typeof PlanosRoute
   '/agenda': typeof AppAgendaRoute
@@ -104,6 +120,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/bem-vindo': typeof BemVindoRoute
+  '/nova-senha': typeof NovaSenhaRoute
   '/obrigado': typeof ObrigadoRoute
   '/planos': typeof PlanosRoute
   '/_app/agenda': typeof AppAgendaRoute
@@ -118,6 +136,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bem-vindo'
+    | '/nova-senha'
     | '/obrigado'
     | '/planos'
     | '/agenda'
@@ -130,6 +150,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bem-vindo'
+    | '/nova-senha'
     | '/obrigado'
     | '/planos'
     | '/agenda'
@@ -143,6 +165,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/bem-vindo'
+    | '/nova-senha'
     | '/obrigado'
     | '/planos'
     | '/_app/agenda'
@@ -157,6 +181,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  BemVindoRoute: typeof BemVindoRoute
+  NovaSenhaRoute: typeof NovaSenhaRoute
   ObrigadoRoute: typeof ObrigadoRoute
   PlanosRoute: typeof PlanosRoute
   AgendarSlugRoute: typeof AgendarSlugRoute
@@ -177,6 +203,20 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bem-vindo': {
+      id: '/bem-vindo'
+      path: '/bem-vindo'
+      fullPath: '/bem-vindo'
+      preLoaderRoute: typeof BemVindoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nova-senha': {
+      id: '/nova-senha'
+      path: '/nova-senha'
+      fullPath: '/nova-senha'
+      preLoaderRoute: typeof NovaSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/obrigado': {
@@ -266,6 +306,8 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  BemVindoRoute: BemVindoRoute,
+  NovaSenhaRoute: NovaSenhaRoute,
   ObrigadoRoute: ObrigadoRoute,
   PlanosRoute: PlanosRoute,
   AgendarSlugRoute: AgendarSlugRoute,

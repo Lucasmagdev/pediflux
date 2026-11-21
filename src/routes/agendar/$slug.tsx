@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AppLoading, Logo } from "@/components/pediflux/Logo";
 import { Avatar, Field } from "@/components/pediflux/ui";
-import { actions, useStore } from "@/data/store";
+import { actions, loadBooking, useStore } from "@/data/store";
 import {
   addDaysISO,
   formatDate,
@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/agendar/$slug")({
   ssr: false,
+  loader: ({ params }) => loadBooking(params.slug),
   pendingComponent: AppLoading,
   head: () => ({
     meta: [
@@ -57,6 +58,7 @@ function BookingPage() {
   const blocks = useStore((s) => s.blocks);
   const requests = useStore((s) => s.requests);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [sending, setSending] = useState(false);
   const [date, setDate] = useState<string | null>(null);
   const [time, setTime] = useState<string | null>(null);
   const [f, setF] = useState({
@@ -101,7 +103,7 @@ function BookingPage() {
 
   const slots = date ? slotsFor(date) : [];
 
-  if (slug !== settings.slug) {
+  if (!settings.slug || slug.toLowerCase() !== settings.slug) {
     return (
       <div className="grid min-h-screen place-items-center bg-surface px-4 text-center">
         <div>
@@ -113,18 +115,29 @@ function BookingPage() {
     );
   }
 
-  function submit() {
+  async function submit() {
     if (
-      !f.guardianName ||
-      !f.childName ||
+      f.guardianName.trim().length < 2 ||
+      f.childName.trim().length < 2 ||
       !f.childBirth ||
       f.phone.replace(/\D/g, "").length < 10
     ) {
       toast.error("Preencha os dados obrigatórios");
       return;
     }
-    actions.addRequest({ ...f, reason: f.reason || "Consulta", date: date!, time: time! });
-    setStep(3);
+    setSending(true);
+    try {
+      await actions.addRequest({ ...f, reason: f.reason || "Consulta", date: date!, time: time! });
+      setStep(3);
+    } catch (e) {
+      toast.error((e as Error).message);
+      if (/ocupado|passou/i.test((e as Error).message)) {
+        setTime(null);
+        setStep(1);
+      }
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -347,8 +360,14 @@ function BookingPage() {
                   />
                 </Field>
               </div>
-              <Button variant="brand" size="lg" className="mt-6 w-full" onClick={submit}>
-                Solicitar agendamento
+              <Button
+                variant="brand"
+                size="lg"
+                className="mt-6 w-full"
+                onClick={submit}
+                disabled={sending}
+              >
+                {sending ? "Enviando…" : "Solicitar agendamento"}
               </Button>
               <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5 text-success" /> Seus dados são usados apenas

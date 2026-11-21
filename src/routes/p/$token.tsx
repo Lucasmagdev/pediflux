@@ -34,7 +34,7 @@ import { ExamThumb } from "@/components/pediflux/ExamsPanel";
 import { VitalsCard } from "@/components/pediflux/HealthOverview";
 import { TYPE_STYLE } from "@/components/pediflux/typeStyle";
 import { MEASURE_META, type GrowthMeasure } from "@/data/growth-reference";
-import { useStore } from "@/data/store";
+import { loadPortal, openExam, useStore } from "@/data/store";
 import type { ExamFile, Patient } from "@/data/types";
 import {
   addDaysISO,
@@ -52,6 +52,7 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/p/$token")({
   ssr: false,
+  loader: ({ params }) => loadPortal(params.token),
   pendingComponent: AppLoading,
   head: () => ({
     meta: [
@@ -754,8 +755,8 @@ function ExamsTab({ child }: { child: Patient }) {
             </DialogDescription>
           </DialogHeader>
           {viewing && <ExamThumb exam={viewing} className="h-64 rounded-2xl" />}
-          <Button variant="brand" onClick={() => toast.success("Download iniciado (demonstração)")}>
-            <Download /> Baixar arquivo
+          <Button variant="brand" onClick={() => viewing && openExam(viewing)}>
+            <Download /> Abrir arquivo
           </Button>
         </DialogContent>
       </Dialog>

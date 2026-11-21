@@ -97,8 +97,8 @@ Aplicação **PediFlux** no Mercado Pago (id 1490964653264128), solução _Assin
   de verdade: ativar _Credenciais de produção_ no painel (dados do negócio), trocar
   `MP_ACCESS_TOKEN`, cadastrar a URL também em _Modo de produção_ dos Webhooks (gera outra
   assinatura secreta → trocar `MP_WEBHOOK_SECRET`) e recriar os planos com o token de produção.
-- `back_url` dos planos aponta para `https://pediflux.netlify.app/obrigado` (provisório):
-  atualizar com o domínio real (PUT /preapproval_plan/{id}).
+- `back_url` dos planos aponta para `https://pediflux.com/obrigado` (atualizado em 21/11/2026
+  via PUT /preapproval_plan/{id}). Ao recriar planos com o token de produção, usar o mesmo valor.
 
 ## Ambientes
 
@@ -112,7 +112,9 @@ Variáveis do front: ver `.env.example` (configurar também no Netlify).
 
 ## Próximos passos
 
-0. Domínio final do Netlify → atualizar `back_url` dos planos e o Site URL do Supabase Auth.
+0. ~~Domínio final~~ feito: `pediflux.com` (DNS na GoDaddy → Netlify, HTTPS Let's Encrypt;
+   `www` redireciona). Supabase Auth: Site URL `https://pediflux.com`, Redirect URLs
+   `https://pediflux.com/**`, `https://www.pediflux.com/**`, `https://pediflux.netlify.app/**`.
 1. Trocar a camada mock (`src/data/store.ts`) por Supabase, mantendo as mesmas telas.
 2. Login real + tela de primeiro acesso (`create_clinic`).
 3. Edge Functions `billing-webhook` e `portal-file`.
