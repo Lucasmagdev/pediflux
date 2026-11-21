@@ -93,10 +93,11 @@ Aplicação **PediFlux** no Mercado Pago (id 1490964653264128), solução _Assin
   e `checkout_url`. Trocar preço = criar novo plano no MP e atualizar a linha.
 - **Segredos** (Supabase → Edge Functions → Secrets): `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET`.
   Nunca no repositório nem no front.
-- **Modo atual: TESTE.** As credenciais são de uma conta de teste do Mercado Pago. Para vender
-  de verdade: ativar _Credenciais de produção_ no painel (dados do negócio), trocar
-  `MP_ACCESS_TOKEN`, cadastrar a URL também em _Modo de produção_ dos Webhooks (gera outra
-  assinatura secreta → trocar `MP_WEBHOOK_SECRET`) e recriar os planos com o token de produção.
+- **Modo atual: PRODUÇÃO (desde 21/11/2026).** `MP_ACCESS_TOKEN` = credencial de produção da conta
+  real; webhook cadastrado no _Modo de produção_ (evento "Planos e assinaturas") apontando para
+  `…/functions/v1/mp-webhook` — o campo de URL do painel já prefixa `https://`, digitar sem ele.
+  Os 6 planos foram recriados com o token de produção (`billing_plans` com os novos `mp_plan_id`
+  e `checkout_url`). Assinatura secreta do webhook: campo único no painel (mesmo `MP_WEBHOOK_SECRET`).
 - `back_url` dos planos aponta para `https://pediflux.com/obrigado` (atualizado em 21/11/2026
   via PUT /preapproval_plan/{id}). Ao recriar planos com o token de produção, usar o mesmo valor.
 
