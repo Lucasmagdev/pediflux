@@ -115,6 +115,9 @@ Variáveis do front: ver `.env.example` (configurar também no Netlify).
 0. ~~Domínio final~~ feito: `pediflux.com` (DNS na GoDaddy → Netlify, HTTPS Let's Encrypt;
    `www` redireciona). Supabase Auth: Site URL `https://pediflux.com`, Redirect URLs
    `https://pediflux.com/**`, `https://www.pediflux.com/**`, `https://pediflux.netlify.app/**`.
+   E-mails do Auth: SMTP próprio via integração Resend ↔ Supabase (domínio `pediflux.com` verificado
+   no Resend, região sa-east-1; DKIM `resend._domainkey` + CNAMEs `rsend`/`send` na GoDaddy).
+   Remetente `nao-responda@pediflux.com`. Modelos de e-mail em português no painel do Supabase.
 1. Trocar a camada mock (`src/data/store.ts`) por Supabase, mantendo as mesmas telas.
 2. Login real + tela de primeiro acesso (`create_clinic`).
 3. Edge Functions `billing-webhook` e `portal-file`.
