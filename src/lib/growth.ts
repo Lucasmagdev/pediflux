@@ -53,6 +53,8 @@ export function patientPoints(
       if (v == null) return [];
       const age = measurementAge(p, m.date, corrected);
       const z = zScore(p.sex, measure, age, v);
+      // fora da faixa de idade da referência OMS (ex.: peso/idade após 10 anos): sem percentil
+      if (!Number.isFinite(z)) return [];
       return [{ id: m.id, date: m.date, age, value: v, z, percentile: percentileFromZ(z) }];
     });
 }

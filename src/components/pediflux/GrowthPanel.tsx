@@ -138,7 +138,7 @@ export function GrowthPanel({ patient }: { patient: Patient }) {
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <GrowthLegend />
           <p className="text-[11px] text-muted-foreground">
-            Referência OMS (valores aproximados de demonstração)
+            Referência OMS (0–5 anos: Padrões 2006 · 5–19 anos: Referência 2007)
           </p>
         </div>
         <p className="mt-4 hidden text-xs text-muted-foreground print:block">

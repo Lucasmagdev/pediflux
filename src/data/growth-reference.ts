@@ -1,81 +1,65 @@
 /**
- * Dados de referência APROXIMADOS para demonstração.
- * Substitua por tabelas oficiais da OMS (LMS) mantendo a mesma interface:
- *   referenceValue(sex, measure, ageMonths, z)
+ * Curvas de crescimento da OMS pelo método LMS (Box-Cox), com os parâmetros oficiais:
+ *   0–5 anos: WHO Child Growth Standards (2006) · 5–19 anos: WHO Growth Reference 2007.
+ * Tabelas em ./who-lms.ts (um ponto por mês; entre meses, L, M e S são interpolados).
+ *
+ *   valor no escore z:  X = M · (1 + L·S·z)^(1/L)        (L = 0 → M · e^(S·z))
+ *   escore z do valor:  z = ((X/M)^L − 1) / (L·S)        (L = 0 → ln(X/M) / S)
+ *
+ * Para peso e IMC a OMS restringe a extrapolação além de ±3 DP (linha reta entre ±2 e ±3 DP);
+ * isso é aplicado em `zScore`.
  */
 import type { Sex } from "./types";
+import { WHO_LMS } from "./who-lms";
 
 export type GrowthMeasure = "weight" | "height" | "head" | "bmi";
 
-const AGES = [0, 1, 2, 3, 4, 6, 9, 12, 18, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156];
+type Lms = [l: number, m: number, s: number];
 
-const MEDIANS: Record<Exclude<GrowthMeasure, "bmi">, Record<Sex, number[]>> = {
-  weight: {
-    M: [
-      3.3, 4.5, 5.6, 6.4, 7.0, 7.9, 8.9, 9.6, 10.9, 12.2, 14.3, 16.3, 18.3, 20.5, 22.9, 25.4, 28.1,
-      31.2, 35.0, 39.0, 44.0,
-    ],
-    F: [
-      3.2, 4.2, 5.1, 5.8, 6.4, 7.3, 8.2, 8.9, 10.2, 11.5, 13.9, 16.1, 18.2, 20.2, 22.4, 25.0, 28.2,
-      31.9, 36.0, 41.0, 45.5,
-    ],
-  },
-  height: {
-    M: [
-      49.9, 54.7, 58.4, 61.4, 63.9, 67.6, 72.0, 75.7, 82.3, 87.8, 96.1, 103.3, 110.0, 116.0, 121.7,
-      127.3, 132.6, 137.8, 143.1, 149.1, 156.0,
-    ],
-    F: [
-      49.1, 53.7, 57.1, 59.8, 62.1, 65.7, 70.1, 74.0, 80.7, 86.4, 95.1, 102.7, 109.4, 115.1, 120.8,
-      126.6, 132.5, 138.6, 144.8, 151.2, 156.4,
-    ],
-  },
-  head: {
-    M: [
-      34.5, 37.3, 39.1, 40.5, 41.6, 43.3, 45.0, 46.1, 47.4, 48.3, 49.5, 50.2, 50.7, 51.1, 51.5,
-      51.8, 52.1, 52.4, 52.7, 53.0, 53.3,
-    ],
-    F: [
-      33.9, 36.5, 38.3, 39.5, 40.6, 42.2, 43.8, 44.9, 46.2, 47.2, 48.5, 49.3, 49.9, 50.3, 50.7,
-      51.0, 51.3, 51.6, 51.9, 52.2, 52.5,
-    ],
-  },
+/** Último mês com referência OMS para a medida. */
+const LAST_MONTH: Record<GrowthMeasure, number> = {
+  weight: 120,
+  height: 228,
+  head: 60,
+  bmi: 228,
 };
 
-/** Dispersão aproximada (log-normal) por medida */
-const SPREAD: Record<GrowthMeasure, number> = {
-  weight: 0.12,
-  height: 0.04,
-  head: 0.03,
-  bmi: 0.085,
-};
+/** L, M e S na idade (meses, fracionária), ou null fora da faixa coberta pela OMS. */
+function lmsAt(sex: Sex, measure: GrowthMeasure, age: number): Lms | null {
+  if (!Number.isFinite(age) || age < 0 || age > LAST_MONTH[measure]) return null;
+  const t = WHO_LMS[measure][sex];
+  const i = Math.min(Math.floor(age), LAST_MONTH[measure] - 1);
+  const f = Math.min(age - i, 1);
+  const at = (k: number, j: number) => t[k * 3 + j]!;
+  return [0, 1, 2].map((j) => at(i, j) + f * (at(i + 1, j) - at(i, j))) as Lms;
+}
 
-function interp(arr: number[], age: number): number {
-  const a = Math.max(0, Math.min(age, AGES[AGES.length - 1]));
-  for (let i = 0; i < AGES.length - 1; i++) {
-    if (a <= AGES[i + 1]) {
-      const t = (a - AGES[i]) / (AGES[i + 1] - AGES[i]);
-      return arr[i] + t * (arr[i + 1] - arr[i]);
-    }
-  }
-  return arr[arr.length - 1];
+function valueAtZ([l, m, s]: Lms, z: number): number {
+  return Math.abs(l) < 1e-7 ? m * Math.exp(s * z) : m * Math.pow(1 + l * s * z, 1 / l);
 }
 
 export function medianValue(sex: Sex, measure: GrowthMeasure, age: number): number {
-  if (measure === "bmi") {
-    const w = interp(MEDIANS.weight[sex], age);
-    const h = interp(MEDIANS.height[sex], age) / 100;
-    return w / (h * h);
-  }
-  return interp(MEDIANS[measure][sex], age);
+  return lmsAt(sex, measure, age)?.[1] ?? NaN;
 }
 
+/** Valor da medida no escore z indicado (usado para desenhar as linhas de percentil). */
 export function referenceValue(sex: Sex, measure: GrowthMeasure, age: number, z: number): number {
-  return medianValue(sex, measure, age) * Math.exp(z * SPREAD[measure]);
+  const lms = lmsAt(sex, measure, age);
+  return lms ? valueAtZ(lms, z) : NaN;
 }
 
+/** Escore z oficial da OMS. NaN se a idade estiver fora da faixa da referência. */
 export function zScore(sex: Sex, measure: GrowthMeasure, age: number, value: number): number {
-  return Math.log(value / medianValue(sex, measure, age)) / SPREAD[measure];
+  const lms = lmsAt(sex, measure, age);
+  if (!lms || !(value > 0)) return NaN;
+  const [l, m, s] = lms;
+  const z = Math.abs(l) < 1e-7 ? Math.log(value / m) / s : (Math.pow(value / m, l) - 1) / (l * s);
+  if ((measure === "weight" || measure === "bmi") && Math.abs(z) > 3) {
+    const sd3 = valueAtZ(lms, Math.sign(z) * 3);
+    const sd2 = valueAtZ(lms, Math.sign(z) * 2);
+    return Math.sign(z) * 3 + (value - sd3) / Math.abs(sd3 - sd2);
+  }
+  return z;
 }
 
 function normCdf(z: number): number {
@@ -120,8 +104,13 @@ export const MEASURE_META: Record<
   GrowthMeasure,
   { label: string; short: string; unit: string; maxAge: number }
 > = {
-  weight: { label: "Peso x idade", short: "Peso", unit: "kg", maxAge: 156 },
-  height: { label: "Comprimento/Estatura x idade", short: "Altura", unit: "cm", maxAge: 156 },
-  head: { label: "Perímetro cefálico x idade", short: "PC", unit: "cm", maxAge: 60 },
-  bmi: { label: "IMC x idade", short: "IMC", unit: "kg/m²", maxAge: 156 },
+  weight: { label: "Peso x idade", short: "Peso", unit: "kg", maxAge: LAST_MONTH.weight },
+  height: {
+    label: "Comprimento/Estatura x idade",
+    short: "Altura",
+    unit: "cm",
+    maxAge: LAST_MONTH.height,
+  },
+  head: { label: "Perímetro cefálico x idade", short: "PC", unit: "cm", maxAge: LAST_MONTH.head },
+  bmi: { label: "IMC x idade", short: "IMC", unit: "kg/m²", maxAge: LAST_MONTH.bmi },
 };
